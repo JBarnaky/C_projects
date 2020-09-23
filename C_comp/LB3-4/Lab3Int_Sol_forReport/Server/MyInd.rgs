@@ -1,0 +1,26 @@
+HKCR
+{
+   Lb3Ind_autosvr.MyInd.1 = s 'CoMyInd Class'
+	{
+		CLSID = s '{7A1B878B-1CE4-41EB-9DC4-D351A0D86CE9}'
+	}
+	Lb3Ind_autosvr.MyInd = s 'CoMyInd Class'
+	{		
+		CurVer = s 'Lb3Ind_autosvr.MyInd.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {7A1B878B-1CE4-41EB-9DC4-D351A0D86CE9} = s 'CoMyInd Class'
+		{
+		    ProgID = s 'Lb3Ind_autosvr.MyInd.1'
+			VersionIndependentProgID = s 'Lb3Ind_autosvr.MyInd'
+			ForceRemove Programmable
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			TypeLib = s '{9841AA19-0E11-4C63-958B-ECBCB7A4F9FB}'
+			Version = s '1.0'
+		}
+	}
+}

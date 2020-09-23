@@ -1,0 +1,26 @@
+HKCR
+{
+	Lb3_autosvr.MyMath.1 = s 'CoMyMath Class'
+	{
+		CLSID = s '{B73A5F85-1919-47BE-B6AB-152B40F81265}'
+	}
+	Lb3_autosvr.MyMath = s 'CoMyMath Class'
+	{		
+		CurVer = s 'Lb3_autosvr.MyMath.1'
+	}
+	NoRemove CLSID
+	{
+		ForceRemove {B73A5F85-1919-47BE-B6AB-152B40F81265} = s 'CoMyMath Class'
+		{
+			ProgID = s 'Lb3_autosvr.MyMath.1'
+			VersionIndependentProgID = s 'Lb3_autosvr.MyMath'
+			ForceRemove Programmable
+			InprocServer32 = s '%MODULE%'
+			{
+				val ThreadingModel = s 'Apartment'
+			}
+			TypeLib = s '{7DCFAB4A-590D-4CB6-9FE7-4E7F430F5307}'
+			Version = s '1.0'
+		}
+	}
+}

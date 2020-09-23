@@ -1,0 +1,55 @@
+// Lb3Ind_autosvr.idl : IDL source for Lb3Ind_autosvr
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (Lb3Ind_autosvr.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	object,
+	uuid(AF644FB0-7E6A-456E-A954-6DB9D50454C5),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IMyInd : IDispatch{
+	[id(1), helpstring("Fun151")] HRESULT Fun71([in] LONG x, [in] LONG y, [out,retval] DOUBLE* z);
+	[id(2), helpstring("Fun152")] HRESULT Fun72([in] LONG x, [in] LONG y, [in] LONG n, [out,retval] DOUBLE* z);
+	[id(3), helpstring("Fun153")] HRESULT Fun73([in] DOUBLE x, [out,retval] DOUBLE* y);
+};
+[
+	object,
+	uuid(2715B9FA-42DF-4B28-9770-F907069FC24E),
+	dual,
+	nonextensible,
+	pointer_default(unique)
+]
+interface IMyInd_Author : IDispatch{
+	[id(4), helpstring("GetAuthor")] HRESULT GetAuthor([in] wchar_t ** author);
+};
+// {2715B9FA-42DF-4B28-9770-F907069FC24E}
+//DEFINE_GUID(<<name>>, 
+//0x2715b9fa, 0x42df, 0x4b28, 0x97, 0x70, 0xf9, 0x7, 0x6, 0x9f, 0xc2, 0x4e);
+
+
+
+[
+	uuid(9841AA19-0E11-4C63-958B-ECBCB7A4F9FB),
+	version(1.0),
+]
+library Lb3Ind_autosvrLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(7A1B878B-1CE4-41EB-9DC4-D351A0D86CE9)		
+	]
+	coclass CoMyInd
+	{
+		[default] interface IMyInd;
+		interface IMyInd_Author;
+
+	};
+};
+
