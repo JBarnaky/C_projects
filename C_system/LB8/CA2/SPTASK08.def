@@ -1,0 +1,8 @@
+EXPORTS
+g_nDllFlag @1
+g_x @2
+g_y @3
+add @4
+sub @5
+mult @6
+div @7

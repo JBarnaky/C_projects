@@ -1,0 +1,34 @@
+!<arch>
+/               -1                      0       680       `
+     ô  *  	d  x  x  è  è  R  R  .  .  ˜  ˜  ¼  ¼      (  
+¼  
+¼  °  °  0  0      š  š__IMPORT_DESCRIPTOR_SP_TASK_08 __NULL_IMPORT_DESCRIPTOR SP_TASK_08_NULL_THUNK_DATA ?g_nDllFlag@@3HA __imp_?g_nDllFlag@@3HA ?g_x@@3HA __imp_?g_x@@3HA ?g_y@@3HA __imp_?g_y@@3HA ?add@@YAHXZ __imp_?add@@YAHXZ ?sub@@YAHXZ __imp_?sub@@YAHXZ ?mult@@YAHXZ __imp_?mult@@YAHXZ __imp__div _div __imp_?nSPTASK08@@3HA ??0CSPTASK08@@QAE@XZ __imp_??0CSPTASK08@@QAE@XZ ??4CSPTASK08@@QAEAAV0@ABV0@@Z __imp_??4CSPTASK08@@QAEAAV0@ABV0@@Z ??4CSPTASK08@@QAEAAV0@$$QAV0@@Z __imp_??4CSPTASK08@@QAEAAV0@$$QAV0@@Z ?fnSPTASK08@@YAHXZ __imp_?fnSPTASK08@@YAHXZ ?div@@YAHXZ __imp_?div@@YAHXZ /               -1                      0       716       `
+   ô  *  d	  x  è  R  .  ˜  ¼    (              ¼
+  °  0                š              	             	   
+ 
+  ??0CSPTASK08@@QAE@XZ ??4CSPTASK08@@QAEAAV0@$$QAV0@@Z ??4CSPTASK08@@QAEAAV0@ABV0@@Z ?add@@YAHXZ ?div@@YAHXZ ?fnSPTASK08@@YAHXZ ?g_nDllFlag@@3HA ?g_x@@3HA ?g_y@@3HA ?mult@@YAHXZ ?sub@@YAHXZ __IMPORT_DESCRIPTOR_SP_TASK_08 __NULL_IMPORT_DESCRIPTOR __imp_??0CSPTASK08@@QAE@XZ __imp_??4CSPTASK08@@QAEAAV0@$$QAV0@@Z __imp_??4CSPTASK08@@QAEAAV0@ABV0@@Z __imp_?add@@YAHXZ __imp_?div@@YAHXZ __imp_?fnSPTASK08@@YAHXZ __imp_?g_nDllFlag@@3HA __imp_?g_x@@3HA __imp_?g_y@@3HA __imp_?mult@@YAHXZ __imp_?nSPTASK08@@3HA __imp_?sub@@YAHXZ __imp__div _div SP_TASK_08_NULL_THUNK_DATA SP_TASK_08.dll/ -1                      0       506       `
+L ÿÿÿÿ        .debug$S        D   Œ               @ B.idata$2           Ð   ä          @ 0À.idata$6             ä           @  À    	     SP_TASK_08.dll'             ¢cMicrosoft (R) LINK                                          SP_TASK_08.dll  @comp.id¢cÿÿ                  .idata$2@  À   h .idata$6        .idata$4@  À    h .idata$5@  À    h     #                <            X   __IMPORT_DESCRIPTOR_SP_TASK_08 __NULL_IMPORT_DESCRIPTOR SP_TASK_08_NULL_THUNK_DATA SP_TASK_08.dll/ -1                      0       253       `
+L ÿÿÿÿ¼         .debug$S        D   d               @ B.idata$3           ¨               @ 0À    	     SP_TASK_08.dll'             ¢cMicrosoft (R) LINK                    @comp.id¢cÿÿ                     __NULL_IMPORT_DESCRIPTOR 
+SP_TASK_08.dll/ -1                      0       284       `
+L ÿÿÿÿØ         .debug$S        D   Œ               @ B.idata$5           Ð               @ 0À.idata$4           Ô               @ 0À    	     SP_TASK_08.dll'             ¢cMicrosoft (R) LINK        @comp.id¢cÿÿ                      SP_TASK_08_NULL_THUNK_DATA SP_TASK_08.dll/ -1                      0       56        `
+  ÿÿ  Lÿÿÿÿ$      ??0CSPTASK08@@QAE@XZ SP_TASK_08.dll SP_TASK_08.dll/ -1                      0       67        `
+  ÿÿ  Lÿÿÿÿ/     ??4CSPTASK08@@QAEAAV0@$$QAV0@@Z SP_TASK_08.dll 
+SP_TASK_08.dll/ -1                      0       65        `
+  ÿÿ  Lÿÿÿÿ-     ??4CSPTASK08@@QAEAAV0@ABV0@@Z SP_TASK_08.dll 
+SP_TASK_08.dll/ -1                      0       47        `
+  ÿÿ  Lÿÿÿÿ      ?add@@YAHXZ SP_TASK_08.dll 
+SP_TASK_08.dll/ -1                      0       47        `
+  ÿÿ  Lÿÿÿÿ     ?div@@YAHXZ SP_TASK_08.dll 
+SP_TASK_08.dll/ -1                      0       54        `
+  ÿÿ  Lÿÿÿÿ"     ?fnSPTASK08@@YAHXZ SP_TASK_08.dll SP_TASK_08.dll/ -1                      0       52        `
+  ÿÿ  Lÿÿÿÿ       ?g_nDllFlag@@3HA SP_TASK_08.dll SP_TASK_08.dll/ -1                      0       45        `
+  ÿÿ  Lÿÿÿÿ      ?g_x@@3HA SP_TASK_08.dll 
+SP_TASK_08.dll/ -1                      0       45        `
+  ÿÿ  Lÿÿÿÿ      ?g_y@@3HA SP_TASK_08.dll 
+SP_TASK_08.dll/ -1                      0       48        `
+  ÿÿ  Lÿÿÿÿ      ?mult@@YAHXZ SP_TASK_08.dll SP_TASK_08.dll/ -1                      0       51        `
+  ÿÿ  Lÿÿÿÿ     ?nSPTASK08@@3HA SP_TASK_08.dll 
+SP_TASK_08.dll/ -1                      0       47        `
+  ÿÿ  Lÿÿÿÿ      ?sub@@YAHXZ SP_TASK_08.dll 
+SP_TASK_08.dll/ -1                      0       40        `
+  ÿÿ  Lÿÿÿÿ      _div SP_TASK_08.dll 
