@@ -1,0 +1,2 @@
+
+#define IDM_FILE_CLOSE 40016

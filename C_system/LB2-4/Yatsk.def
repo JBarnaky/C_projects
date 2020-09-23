@@ -1,0 +1,8 @@
+LIBRARY Yatsk_DLL.dll
+EXPORTS
+g_nFnCallsCount @1
+g_nDllCallsCount @2
+Fun121 @3
+Fun122 @4
+Fun123 @5
+
