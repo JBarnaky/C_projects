@@ -1,0 +1,11 @@
+for (size_t i=0; j<N; ++i) {
+	for (size_t j=0; j<M; ++j) {
+		v[i][j] = 1;
+	}
+}
+
+for (size_t j=0; j<N; ++j) {
+	for (size_t i=0; i<M; ++i) {
+		v[i][j] = 1;
+	}
+}
