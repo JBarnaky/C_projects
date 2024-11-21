@@ -1,44 +1,42 @@
-#include <stdio.h>
-#include <conio.h>
-#include <math.h>
-#include <process.h>
-#include <locale.h>
+#include <iostream>
+#include <cmath>
+#include <locale>
+#include <limits>
 
 void f1(double, double);
-void main()
+
+int main()
 {
-	setlocale(LC_CTYPE, "Russian");
+    std::locale::global(std::locale("Russian_Russia.1251"));
+    std::cout.imbue(std::locale());
 
-	double a, b, t2;
-	
-	puts("Введите a, b");
+    double a, b, t2;
 
-	scanf_s("%lf, %lf", &a, &b);
+    std::cout << "Р’РІРµРґРёС‚Рµ a, b: ";
+    std::cin >> a >> b;
 
-	if ((a == 0) || (b == 0))  f1(a, b);
+    if ((a == 0) || (b == 0))  f1(a, b);
 
-	if (a * b > 0.5)
-	{
-		t2 = exp(-((fabs(a) + fabs(b)) / 2)) * (1 / tan(a));
-		printf("\n Результат 1: t2=%lf \n", t2);
-	}
-	
-		if (0.4 < a * b <= 0.5)
-		{
-			t2 = fabs(a + (pow(b, 2))) * (1 / tan(b));
-			printf("\n Результат 2: t2=%lf \n", t2);
-		}
-		
-	_getch();
+    if (a * b > 0.5)
+    {
+        t2 = std::exp(-((std::fabs(a) + std::fabs(b)) / 2)) * (1 / std::tan(a));
+        std::cout << "\n Р РµР·СѓР»СЊС‚Р°С‚ 1: t2=" << t2 << "\n";
+    }
+
+    if (0.4 < a * b && a * b <= 0.5)
+    {
+        t2 = std::fabs(a + std::pow(b, 2)) * (1 / std::tan(b));
+        std::cout << "\n Р РµР·СѓР»СЊС‚Р°С‚ 2: t2=" << t2 << "\n";
+    }
+
+    std::cin.get(); // Pause the program
+    return 0;
 }
 
 void f1(double a, double b)
 {
-	printf("\n Нет решения a=%lf, b=%lf  \n", a, b);
-	fflush(stdin);
+    std::cout << "\n РќРµС‚ СЂРµС€РµРЅРёСЏ РґР»СЏ a=" << a << ", b=" << b << "\n";
 
-	puts("\n Введите a, b");
-
-	scanf_s("%lf, %lf", &a, &b);
-
+    std::cout << "\n Р’РІРµРґРёС‚Рµ a, b: ";
+    std::cin >> a >> b;
 }
