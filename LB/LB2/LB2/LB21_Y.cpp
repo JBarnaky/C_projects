@@ -1,22 +1,21 @@
-#define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
-#include <math.h>
-#include <locale.h>
+#include <iostream>
+#include <cmath>
+#include <locale>
 
-int main()
-{
-    setlocale(LC_CTYPE, "Russian");
+int main() {
+    std::locale::global(std::locale("ru_RU.UTF-8"));
+    std::cout.imbue(std::locale());
 
     double b;
 
-    puts("Введите b:");
-    scanf("%lf", &b);
+    std::cout << "Введите b: ";
+    std::cin >> b;
 
-    double temp = sqrt(pow(b, 2) - 4) + b + 2;
-    double z1 = sqrt(2 * b + 2 * temp) / temp;
-    double z2 = 1 / sqrt(b + 2);
+    double temp = std::sqrt(std::pow(b, 2) - 4) + b + 2;
+    double z1 = std::sqrt(2 * b + 2 * temp) / temp;
+    double z2 = 1 / std::sqrt(b + 2);
 
-    printf("Результат: z1=%.4lf z2=%.4lf\n", z1, z2);
+    std::cout << "Результат: z1=" << std::fixed << std::setprecision(4) << z1 << " z2=" << z2 << std::endl;
 
     return 0;
 }
