@@ -1,49 +1,41 @@
-#include <stdio.h>
+#include <iostream>
+#include <cmath>
+#include <locale>
 #include <conio.h>
-#include <math.h>
-#include <process.h>
-#include <locale.h>
 
 void f1(double, double, double);
-void main()
-{
-	setlocale(LC_CTYPE, "Russian");
 
-	double x, y, z, u;
-	double min, max1, max2, max3;
+int main() {
+    std::locale::global(std::locale("ru_RU.UTF-8"));
+    std::cout.imbue(std::locale());
 
-	puts("Введите x, y, z");
+    double x, y, z, u;
+    double min, max1, max2, max3;
 
-	scanf_s("%lf, %lf, %lf", &x, &y, &z);
+    std::cout << "Р’РІРµРґРёС‚Рµ x, y, z: ";
+    std::cin >> x >> y >> z;
 
-	if ((x == y) || (x == z) || (z == y)) f1(x, y, z);
+    if ((x == y) || (x == z) || (z == y)) {
+        f1(x, y, z);
+    }
 
-	if (y > z) min = z;
-	else min = y;
+    min = std::min(y, z);
+    max1 = std::max(x, y);
+    max2 = std::max(y, z);
+    max3 = std::max(max1, max2);
 
-	if (x > y) max1 = x;
-	else max1 = y;
+    u = min / max3;
 
-	if (y > z) max2 = y;
-	else max2 = z;
+    std::cout << "\n Р РµР·СѓР»СЊС‚Р°С‚: u=" << std::fixed << std::setprecision(6) << u << std::endl;
 
-	if (max1 > max2) max3 = max1;
-	else max3 = max2;
+    _getch();
 
-	u = min / max3;
-	
-	printf("\n Результат: u=%lf \n", u);
-	
-	_getch();
+    return 0;
 }
 
-void f1(double x, double y, double z)
-{
-	printf("\n Одно или несколько значений x=%lf, y=%lf, z=%lf совпадают \n", x, y, z);
-	fflush(stdin);
+void f1(double x, double y, double z) {
+    std::cout << "\n Р’РІРµРґРµРЅС‹ РѕРґРёРЅР°РєРѕРІС‹Рµ Р·РЅР°С‡РµРЅРёСЏ x=" << x << ", y=" << y << ", z=" << z << " РїРѕРІС‚РѕСЂРёС‚Рµ РІРІРѕРґ \n";
 
-	puts("\n Введите x, y, z");
-
-	scanf_s("%lf, %lf, %lf", &x, &y, &z);
-
+    std::cout << "\n Р’РІРµРґРёС‚Рµ x, y, z: ";
+    std::cin >> x >> y >> z;
 }
