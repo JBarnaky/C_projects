@@ -1,22 +1,28 @@
-#include <stdio.h>
+#include <iostream>
+#include <cmath>
+#include <locale>
+#include <clocale>
 #include <conio.h>
-#include <math.h>
-#include <locale.h>
 
-void main()
-{
-	setlocale(LC_CTYPE, "Russian");
+int main() {
+    std::setlocale(LC_CTYPE, "Russian");
+    std::locale::global(std::locale("ru_RU.UTF-8"));
+    std::cout.imbue(std::locale());
 
-	double x, y, z, h;
+    double x, y, z, h;
 
-	x = 2.444;
-	y = 0.869*pow(10, -2);
-	z = -0.13*pow(10, 3);
-	// h = -0.49871;
+    x = 2.444;
+    y = 0.869 * std::pow(10, -2);
+    z = -0.13 * std::pow(10, 3);
 
-	h = pow(x, (y + 1)) + exp(y - 1) / 1 + x*(fabs(y - tan(z)))*(1 + fabs(y - x)) + pow(fabs(y - x), 2) / 2 - pow(fabs(y - x), 3) / 3;
-	
-	printf("\n Ðåçóëüòàò: h=%lf \n", h);
+    // Calculate h
+    h = std::pow(x, (y + 1)) + std::exp(y - 1) / (1 + x * std::fabs(y - std::tan(z)) * (1 + std::fabs(y - x)) + std::pow(std::fabs(y - x), 2) / 2 - std::pow(std::fabs(y - x), 3) / 3);
 
-	_getch();
+    // Output the result
+    std::cout << "\nÐ ÐµÐ·ÑƒÐ»ÑŒÑ‚Ð°Ñ‚: h=" << std::fixed << std::setprecision(6) << h << std::endl;
+
+    // Wait for a key press before closing
+    _getch();
+
+    return 0;
 }
