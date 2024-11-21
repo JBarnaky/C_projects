@@ -1,107 +1,70 @@
-#include <stdio.h> 
-#include <conio.h>
-#include <locale.h> 
-#include <process.h>
-#include <string.h>
-#include <Windows.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <locale>
+#include <cstdlib>
 
-void menu(); //
-FILE* openFile(char*);
-void readAndWriteword();
+void menu();
+std::ifstream openFile(const std::string& name);
+void readAndWriteWord();
 
-void main()
-{
-	setlocale(LC_CTYPE, "Russian");
-	system("cls");
-	fflush(stdin);
+int main() {
+    std::locale::global(std::locale("Russian_Russia.1251"));
+    system("cls");
 
-	menu(); //вызов функции 
-}
-//Меню программы
-void menu()
-{
-	int n = 0; //инициализация переменной
-	puts("Выберите следующее действие:\n 1 - Вывод текста из файла на экран. Вывод количества слов в файле. \n 2 - Выход");//вывод сообщения на экран
-	scanf_s("%d", &n);//ввод номера команды
-
-	switch (n)//выбор введенной программы
-	{
-	case 1: {readAndWriteword(); break; } //вывод текста и подсчет слов
-	case 2: {return; }//выход
-	default: menu(); //возвращение в меню
-	}
+    menu(); // Call the menu function
+    return 0;
 }
 
-// Функция считывает и выводит содержание файла, а так же выводит количество предложений
-void readAndWriteword()
-{
-	fflush(stdin);
-	char word; //объявление переменной
-	int count = 0; //инициализация переменной
-	char symble[70] = ".?!"; //массив с пробелом
-	FILE *f; // объявление переменной
-	char *str = new char[70]; //массив символов
-	
-	f = openFile("d:\\asd.dat"); //вызов функции для открытия файла
+// Program menu
+void menu() {
+    int n = 0; // Initialize variable
+    std::cout << "Р’С‹Р±РµСЂРёС‚Рµ СЃР»РµРґСѓСЋС‰РµРµ РґРµР№СЃС‚РІРёРµ:\n 1 - Р’С‹РІРѕРґ С‚РµРєСЃС‚Р° РёР· С„Р°Р№Р»Р° РЅР° СЌРєСЂР°РЅ. Р’С‹РІРѕРґ РєРѕР»РёС‡РµСЃС‚РІР° СЃР»РѕРІ РІ С„Р°Р№Р»Рµ. \n 2 - Р’С‹С…РѕРґ\n";
+    std::cin >> n; // Input command number
 
-
-
-	puts("\n Содержимое файла \n"); //вывод на экран
-	
-	if (!feof(f)) //если конец файла
-	{
-		word = fgetc(f); //считывание символа из файла
-
-		if (strchr(symble, word) != NULL) //поиск символов конца предложения
-		{
-			count++; //+1
-		}
-		while (!feof(f)) //пока не конец файла
-		{
-			printf("%c", word); //вывод символа
-			{
-				if (!feof(f)) //если не конец файла
-				{
-					word = fgetc(f); //считывание теста из файла
-
-					if (strchr(symble, word) != NULL) //если символ конца предложения 
-					{
-						count++; //+1
-					}
-				}
-			}
-		}
-		puts("\n"); //вывод на экран
-		printf("%s", "Количество предложений:"); //вывод на экран
-		printf("%d", count); //вывод на экран
-		puts("\n"); //вывод на экран
-	}
-	else
-	{
-		puts("Файл пуст!"); //вывод на экран
-	}
-
-	fclose(f); //закрытие документа
-	delete[]str; //удаление массива
-
-	menu(); //переход в меню
+    switch (n) {
+        case 1: readAndWriteWord(); break; // Output text and count words
+        case 2: return; // Exit
+        default: menu(); // Return to menu
+    }
 }
-// Функция открытия файла 
-FILE* openFile(char* name)
 
-{
-	setlocale(LC_CTYPE, "Russian");
-	system("cls");
-	fflush(stdin);
+// Function reads and outputs the content of the file, as well as the number of sentences
+void readAndWriteWord() {
+    char word;
+    int count = 0; // Initialize variable
+    const std::string symbols = ".?!"; // Array with sentence delimiters
+    std::ifstream f;
 
-	FILE* f; // объявление переменной
-	if ((fopen_s(&f, name, "r")) != 0) //если не удалось открыть файл
-	{
-		printf("Ошибка открытия файла\n"); //вывод на экран
-		menu(); //переход в меню
-	}
-	else
-	{
-		return f; //возвращение переменной с сылкой на открываемый файл
-	}
+    f = openFile("d:\\asd.dat"); // Call the function to open the file
+
+    std::cout << "\n РЎРѕРґРµСЂР¶РёРјРѕРµ С„Р°Р№Р»Р° \n"; // Output to screen
+
+    if (f) {
+        while (f.get(word)) { // Read characters from the file
+            std::cout << word; // Output character
+            if (symbols.find(word) != std::string::npos) { // If the character is a sentence delimiter
+                count++; // Increment count
+            }
+        }
+        std::cout << "\nРљРѕР»РёС‡РµСЃС‚РІРѕ РїСЂРµРґР»РѕР¶РµРЅРёР№: " << count << "\n"; // Output the number of sentences
+    } else {
+        std::cout << "Р¤Р°Р№Р» РїСѓСЃС‚!\n"; // Output if the file is empty
+    }
+
+    f.close(); // Close the file
+    menu(); // Return to the menu
+}
+
+// Function to open the file
+std::ifstream openFile(const std::string& name) {
+    std::locale::global(std::locale("Russian_Russia.1251"));
+    system("cls");
+
+    std::ifstream f(name); // Open the file
+    if (!f) {
+        std::cout << "РћС€РёР±РєР° РѕС‚РєСЂС‹С‚РёСЏ С„Р°Р№Р»Р°\n"; // Output if the file cannot be opened
+        menu(); // Return to the menu
+    }
+    return f; // Return the file stream
 }
