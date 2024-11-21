@@ -1,45 +1,52 @@
-#include <stdio.h>
-#include <conio.h> 
-#include <math.h>
-#include <process.h>
-#include <locale.h>
+#include <iostream>
+#include <iomanip>
+#include <cmath>
+#include <locale>
 
+int main() {
+    // Set locale to Russian
+    std::locale::global(std::locale("ru_RU.UTF-8"));
+    std::cout.imbue(std::locale());
 
-void main ()
-{	
-	setlocale(LC_CTYPE, "Russian");
+    double a, b, h, x, y, s, delta;
+    int n;
 
-	double a,b,h,x,y,s,delta;
-	int n,k;
+    // Input values
+    std::cout << "Р’РІРµРґРёС‚Рµ a: ";
+    std::cin >> a;
 
-	printf("Введите a:");
-	scanf_s("%lf", &a);
+    std::cout << "Р’РІРµРґРёС‚Рµ b: ";
+    std::cin >> b;
 
-	printf("Введите b:");
-	scanf_s("%lf", &b);
+    std::cout << "Р’РІРµРґРёС‚Рµ h: ";
+    std::cin >> h;
 
-	printf("Введите h:");
-	scanf_s("%lf", &h);
+    std::cout << "Р’РІРµРґРёС‚Рµ n: ";
+    std::cin >> n;
 
-	printf("Введите n:");
-	scanf_s("%d", &n);
+    std::cout << "\n";
+    std::cout << "| x | Y(x) | S(x) | Y(x)-S(x) |\n";
+    std::cout << "_______________________________\n";
 
-	printf("\n");
-	puts("| x | Y(x) | S(x) | Y(x)-S(x) |");
-	puts("_______________________________\n");
+    x = a;
+    while (x <= b) {
+        s = 0.0;
+        for (int k = 1; k <= n; k++) {
+            s += std::pow(-1.0, k + 1) * std::pow(x, 2.0 * k) / (2.0 * k * (2.0 * k - 1));
+        }
 
-	x=a;
-	while (x<=b)
-	{
-		s=0;
-		for(k=1;k<=n;k++);
-		{
-			s+=pow(-1.,k+1)*pow(x,2.*k)/(2.*k*(2.*k-1));
-		}
-			y=x*atan(x)-log(sqrt(1+pow(x,2)));
-			delta=fabs(y-s);
-			printf("x=%.2lf | y=%.5lf | s=%.5lf| delta=%.5lf | \n", x, y, s, delta);
-			x+=h;
-		}
-		_getch();
-	}
+        y = x * std::atan(x) - std::log(std::sqrt(1.0 + std::pow(x, 2.0)));
+        delta = std::fabs(y - s);
+
+        std::cout << "x=" << std::fixed << std::setprecision(2) << x
+                  << " | y=" << std::fixed << std::setprecision(5) << y
+                  << " | s=" << std::fixed << std::setprecision(5) << s
+                  << " | delta=" << std::fixed << std::setprecision(5) << delta
+                  << " |\n";
+
+        x += h;
+    }
+
+    std::cin.get();
+    return 0;
+}
