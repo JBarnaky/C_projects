@@ -1,57 +1,66 @@
-#include <stdio.h>
-#include <conio.h> 
-#include <math.h>
-#include <process.h>
-#include <locale.h>
+#include <iostream>
+#include <iomanip>
+#include <cmath>
+#include <locale>
 
-double funS(double, int, double);
-double funY(double, double);
-void main ()
-{	
-	setlocale(LC_CTYPE, "Russian");
+// Function prototypes
+double funS(double s, int k, double x);
+double funY(double y, double x);
 
-	double a,b,h,x,y,s,delta;
-	int n,k;
+int main() {
+    // Set locale to Russian
+    std::locale::global(std::locale("ru_RU.UTF-8"));
+    std::cout.imbue(std::locale());
 
-	printf("Введите a:");
-	scanf_s("%lf", &a);
+    double a, b, h, x, y, s, delta;
+    int n;
 
-	printf("Введите b:");
-	scanf_s("%lf", &b);
+    // Input values
+    std::cout << "Р’РІРµРґРёС‚Рµ a: ";
+    std::cin >> a;
 
-	printf("Введите h:");
-	scanf_s("%lf", &h);
+    std::cout << "Р’РІРµРґРёС‚Рµ b: ";
+    std::cin >> b;
 
-	printf("Введите n:");
-	scanf_s("%d", &n);
+    std::cout << "Р’РІРµРґРёС‚Рµ h: ";
+    std::cin >> h;
 
-	printf("\n");
-	puts("| x | Y(x) | S(x) | Y(x)-S(x) |");
-	puts("_______________________________\n");
+    std::cout << "Р’РІРµРґРёС‚Рµ n: ";
+    std::cin >> n;
 
-	x=a;
-	while (x<=b)
-	{
-		s=0;
-		y=0;
-		for(k=1;k<=n;k++);
-		{
-			funS(s,k,x);
-		}
-			funY(y,x);
-			delta=fabs(y-s);
-			printf("x=%.2lf | y=%.5lf | s=%.5lf| delta=%.5lf | \n", x, y, s, delta);
-			x+=h;
-		}
-		_getch();
-	}
-double funS(double s, int k, double x)
-{
-	s+=pow(-1.,k+1)*pow(x,2.*k)/(2.*k*(2.*k-1));
-	return(s);
+    std::cout << "\n";
+    std::cout << "| x | Y(x) | S(x) | Y(x)-S(x) |\n";
+    std::cout << "_______________________________\n";
+
+    x = a;
+    while (x <= b) {
+        s = 0.0;
+        y = 0.0;
+        for (int k = 1; k <= n; k++) {
+            s = funS(s, k, x);
+        }
+        y = funY(y, x);
+        delta = std::fabs(y - s);
+
+        std::cout << "x=" << std::fixed << std::setprecision(2) << x
+                  << " | y=" << std::fixed << std::setprecision(5) << y
+                  << " | s=" << std::fixed << std::setprecision(5) << s
+                  << " | delta=" << std::fixed << std::setprecision(5) << delta
+                  << " |\n";
+
+        x += h;
+    }
+
+    std::cin.get();
+    return 0;
 }
-double funY(double y, double x)
-{
-	y+=x*atan(x)-log(sqrt(1+pow(x,2)));
-	return(y);
+
+double funS(double s, int k, double x) {
+    s += std::pow(-1.0, k + 1) * std::pow(x, 2.0 * k) / (2.0 * k * (2.0 * k - 1));
+    return s;
+}
+
+double funY(double y, double x) {
+    y += x * std::atan(x) - std::log(std::sqrt(1.0 + std::pow(x, 2.0)));
+    return y;
 }
