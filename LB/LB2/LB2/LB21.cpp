@@ -1,18 +1,20 @@
-#include <stdio.h>
-#include <math.h>
-#include <locale.h>
+#include <iostream>
+#include <cmath>
+#include <locale>
 
-int main()
-{
-    setlocale(LC_CTYPE, "Russian");
+int main() {
+    std::locale::global(std::locale("ru_RU.UTF-8"));
+    std::cout.imbue(std::locale());
 
     double x = 2.444;
-    double y = 0.869 * pow(10, -2);
-    double z = -0.13 * pow(10, 3);
+    double y = 0.869 * std::pow(10, -2);
+    double z = -0.13 * std::pow(10, 3);
 
-    double h = pow(x, y + 1) + exp(y - 1) / (1 + x * (fabs(y - tan(y))) * (1 + fabs(y - x)) + pow(fabs(y - x), 2) / 2 - pow(fabs(y - x), 3) / 3);
+    // Calculate h
+    double h = std::pow(x, y + 1) + std::exp(y - 1) / (1 + x * (std::fabs(y - std::tan(y))) * (1 + std::fabs(y - x)) + std::pow(std::fabs(y - x), 2) / 2 - std::pow(std::fabs(y - x), 3) / 3);
 
-    printf("\nДåçóëüòàò: h=%.4lf\n", h);
+    // Output the result
+    std::cout << "\nРезультат: h=" << std::fixed << std::setprecision(4) << h << std::endl;
 
     return 0;
 }
