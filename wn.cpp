@@ -1,6 +1,7 @@
-﻿#include <windows.h>
-#include <cstdlib> // For rand()
-#include <ctime>   // For time
+#include <windows.h>
+#include <ctime>   // For std::time
+#include <vector>  // For std::vector
+#include <random>  // For std::mt19937 and std::uniform_int_distribution
 
 // Constants for window dimensions
 const int WIDTH = 1920;
@@ -10,12 +11,14 @@ const int FRAME_TIME = 1000 / FRAME_RATE; // Frame time in milliseconds
 
 // Function declarations
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-void GenerateWhiteNoise(HDC hdc);
+void GenerateWhiteNoise(HDC hdc, HBITMAP hBitmap, BYTE* pixels);
 
 // Entry point of the application
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
-    // Seed the random number generator
-    std::srand(static_cast<unsigned int>(std::time(nullptr)));
+    // Seed the random number generator with Mersenne Twister
+    std::random_device rd; // Obtain a random number from hardware
+    std::mt19937 mt(rd()); // Seed the generator
+    std::uniform_int_distribution<int> dist(0, 255); // Distribution in range [0, 255]
 
     // Register the window class
     const char CLASS_NAME[] = "WhiteNoiseWindowClass";
@@ -57,11 +60,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd) {
 
 // Window procedure to handle messages
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+    static HBITMAP hBitmap = nullptr;
+    static std::vector<BYTE> pixels(WIDTH * HEIGHT * 4); // Buffer for pixel data
+    static std::random_device rd; // Obtain a random number from hardware
+    static std::mt19937 mt(rd()); // Seed the generator
+    static std::uniform_int_distribution<int> dist(0, 255); // Distribution in range [0, 255]
+
     switch (uMsg) {
+    case WM_CREATE:
+        // Create a bitmap once
+        hBitmap = CreateCompatibleBitmap(GetDC(hwnd), WIDTH, HEIGHT);
+        return 0;
+
     case WM_PAINT: {
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hwnd, &ps);
-        GenerateWhiteNoise(hdc); // Generate and display white noise
+        GenerateWhiteNoise(hdc, hBitmap, pixels.data()); // Generate and display white noise
         EndPaint(hwnd, &ps);
         return 0;
     }
@@ -71,6 +85,7 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         return 0;
     }
     case WM_DESTROY:
+        DeleteObject(hBitmap); // Clean up bitmap
         PostQuitMessage(0);
         return 0;
     }
@@ -78,13 +93,21 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 }
 
 // Function to generate and display white noise
-void GenerateWhiteNoise(HDC hdc) {
-    // Create a bitmap to hold the noise
-    HBITMAP hBitmap = CreateCompatibleBitmap(hdc, WIDTH, HEIGHT);
+void GenerateWhiteNoise(HDC hdc, HBITMAP hBitmap, BYTE* pixels) {
+    // Fill the pixel buffer with random grayscale values
+    for (int i = 0; i < WIDTH * HEIGHT; ++i) {
+        BYTE grayValue = static_cast<BYTE>(rand() % 256); // Replace this with Mersenne Twister
+        pixels[i * 4 + 0] = grayValue; // Blue
+        pixels[i * 4 + 1] = grayValue; // Green
+        pixels[i * 4 + 2] = grayValue; // Red
+        pixels[i * 4 + 3] = 255; // Alpha (fully opaque
+    }
+
+    // Create a memory device context
     HDC memDC = CreateCompatibleDC(hdc);
     SelectObject(memDC, hBitmap);
 
-    // Create a buffer for the pixel data
+    // Create a BITMAPINFO structure for the bitmap
     BITMAPINFO bmpInfo;
     ZeroMemory(&bmpInfo, sizeof(BITMAPINFO));
     bmpInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
@@ -94,18 +117,6 @@ void GenerateWhiteNoise(HDC hdc) {
     bmpInfo.bmiHeader.biBitCount = 32; // 32 bits for ARGB
     bmpInfo.bmiHeader.biCompression = BI_RGB;
 
-    // Allocate memory for the pixel data
-    BYTE* pixels = new BYTE[WIDTH * HEIGHT * 4]; // 4 bytes per pixel (ARGB)
-
-    // Fill the pixel buffer with random grayscale values
-    for (int i = 0; i < WIDTH * HEIGHT; ++i) {
-        BYTE grayValue = static_cast<BYTE>(rand() % 256);
-        pixels[i * 4 + 0] = grayValue; // Blue
-        pixels[i * 4 + 1] = grayValue; // Green
-        pixels[i * 4 + 2] = grayValue;
-        pixels[i * 4 + 3] = 255; // Alpha (fully opaque)
-    }
-
     // Set the pixel data to the bitmap
     SetDIBits(memDC, hBitmap, 0, HEIGHT, pixels, &bmpInfo, DIB_RGB_COLORS);
 
@@ -113,7 +124,5 @@ void GenerateWhiteNoise(HDC hdc) {
     BitBlt(hdc, 0, 0, WIDTH, HEIGHT, memDC, 0, 0, SRCCOPY);
 
     // Clean up
-    DeleteObject(hBitmap);
-    DeleteDC(memDC);
-    delete[] pixels; // Free the allocated pixel buffer
+    DeleteDC(memDC); // Clean up the memory device context
 }
