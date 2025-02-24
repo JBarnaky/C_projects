@@ -1,334 +1,292 @@
-//15. Найти запись с ключом, ближайшим к среднему значению между
-//максимальным и минимальным значениями ключей.
+//15. ГЌГ Г©ГІГЁ Г§Г ГЇГЁГ±Гј Г± ГЄГ«ГѕГ·Г®Г¬, ГЎГ«ГЁГ¦Г Г©ГёГЁГ¬ ГЄ Г±Г°ГҐГ¤Г­ГҐГ¬Гі Г§Г­Г Г·ГҐГ­ГЁГѕ Г¬ГҐГ¦Г¤Гі
+//Г¬Г ГЄГ±ГЁГ¬Г Г«ГјГ­Г»Г¬ ГЁ Г¬ГЁГ­ГЁГ¬Г Г«ГјГ­Г»Г¬ Г§Г­Г Г·ГҐГ­ГЁГїГ¬ГЁ ГЄГ«ГѕГ·ГҐГ©.
+
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
-#include <locale.h>
-#include <process.h>
-#include <conio.h>
-#include <io.h>
-#include <malloc.h>
-#include <windows.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
-struct Tree
-{
-	struct info
-	{
-		char fio[20];
-		int pas_num;
-	} pas_data;
-	int key;
-	Tree *Left, *Right;
-};
+typedef struct Passenger {
+    char fio[20];
+    int pas_num;
+} Passenger;
 
-//Буфферная структура
-struct Buffer
-{
-	int key_b;
-	float z; //разница ключа и среднего значения ключа по модулю z=|x-key|
-	char fio_b[20];
-	int pas_num_b;
-} pas_data_b[30], b;
+typedef struct TreeNode {
+    int key;
+    Passenger data;
+    struct TreeNode* left;
+    struct TreeNode* right;
+} TreeNode;
 
-Tree* List(int); //добавление листа дерева
-Tree* Make(Tree*); //создание дерева
-void Find(Tree*, int); //поиск информации по ключу
-void View(Tree*, int); //просмотр информации
-Tree* Del(Tree*, int); //удаление узла по ключу
-void Middle(Tree*, int*, int*); //данные для среднего значения ключа
-void Task(Tree*, float, Buffer*, int*);
-int FindMax(Tree*, int);
-int FindMin(Tree*, int);
+typedef struct Buffer {
+    int key;
+    float z; // |x - key|
+    char fio[20];
+    int pas_num;
+} Buffer;
 
-void main()
-{
-	setlocale(LC_CTYPE, "Russian");
-	system("cls");
-	char*yn = (char*)malloc(2 * sizeof(char)); // да/нет
-	int n; //номер меню case
-	int level = 0; //уровень корня
-	int fkey; //ключ поиска
-	int key_sum = 0, *ukey_sum = &key_sum;
-	int quant = 0, *uquant = &quant;
-	Tree*Root = NULL; //Указатель корня
+// РџСЂРѕС‚РѕС‚РёРїС‹ С„СѓРЅРєС†РёР№
+TreeNode* create_node(int key);
+TreeNode* insert_node(TreeNode* root, int key);
+TreeNode* delete_node(TreeNode* root, int key);
+void find_node(TreeNode* root, int key);
+void view_tree(TreeNode* root, int level);
+void traverse_and_sum(TreeNode* root, int* key_sum, int* count);
+void task(TreeNode* root, float x, Buffer buffer[], int* count);
+int find_max(TreeNode* root, int curr_max);
+int find_min(TreeNode* root, int curr_min);
+void sort_buffer(Buffer buffer[], int count);
+void free_tree(TreeNode* root);
 
-	while (yn[0] != 'д')
-	{
-		fflush(stdin);
-		puts("1 – создание дерева");
-		puts("2 – добавление новой записи");
-		puts("3 – поиск информации по заданному ключу");
-		puts("4 – удаление узла с заданным ключом");
-		puts("5 – вывод информации");
-		puts("6 – Найти запись с ключом, ближайшим к среднему значению между максимальным и минимальным значениями ключей.");
-		scanf("%d", &n);
+int main(void) {
+    setbuf(stdout, NULL);
+    TreeNode* root = NULL;
+    int choice, key, dummy;
+    int key_sum = 0, count = 0;
+    Buffer buffer[30];
+    char yn[3] = "Y"; // Р”Р»СЏ РїСЂРѕРґРѕР»Р¶РµРЅРёСЏ СЂР°Р±РѕС‚С‹
 
-		switch (n)
-		{
-		case 1: Root = Make(Root); break;
-		case 2: Make(Root); break;
-		case 3:
-		{	fflush(stdin);
-		printf("Введите ключ узла: ");
-		scanf("%d", &fkey);
-		Find(Root, fkey);
-		break;	}
-		case 4:
-		{	fflush(stdin);
-		printf("Введите ключ удаляемого узла: ");
-		scanf("%d", &fkey);
-		Del(Root, fkey);
-		break;	}
-		case 5: View(Root, level); break;
-		case 6:
-		{	Middle(Root, &key_sum, &quant); //данные для среднего значения ключа
-		float x = (float)key_sum / (float)quant; //вычисление среднего значения ключа
-		fflush(stdin);
-		printf("\nСреднее значение ключа: %.2f", x);
-		quant = 0;
-		Task(Root, x, pas_data_b, &quant);
+    while (yn[0] != 'n' && yn[0] != 'N') {
+        printf("\nРњРµРЅСЋ:\n");
+        printf("1. Р”РѕР±Р°РІРёС‚СЊ СѓР·РµР» РІ РґРµСЂРµРІРѕ\n");
+        printf("2. Р’СЃС‚Р°РІРёС‚СЊ РЅРµСЃРєРѕР»СЊРєРѕ СѓР·Р»РѕРІ (РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РѕС‚РґРµР»СЊРЅРѕ)\n");
+        printf("3. РџРѕРёСЃРє СѓР·Р»Р° РїРѕ РєР»СЋС‡Сѓ\n");
+        printf("4. РЈРґР°Р»РёС‚СЊ СѓР·РµР»\n");
+        printf("5. Р’С‹РІРѕРґ РґРµСЂРµРІР°\n");
+        printf("6. Р—Р°РґР°РЅРёРµ: РѕР±СЂР°Р±РѕС‚РєР° РґРµСЂРµРІР°\n");
+        printf("Р’С‹Р±РµСЂРёС‚Рµ РґРµР№СЃС‚РІРёРµ: ");
+        if(scanf("%d", &choice) != 1){
+            printf("РћС€РёР±РєР° РІРІРѕРґР°!\n");
+            exit(EXIT_FAILURE);
+        }
 
-		//сортировка по z=|x-key|
-		for (int i = 0; i<quant; i++)
-		{
-			for (int j = i; j<quant; j++)
-				if (pas_data_b[i].z>pas_data_b[j].z)
-				{
-					b = pas_data_b[i];
-					pas_data_b[i] = pas_data_b[j];
-					pas_data_b[j] = b;
-				}
-		}
+        switch (choice) {
+            case 1: {
+                printf("Р’РІРµРґРёС‚Рµ РєР»СЋС‡ (С†РµР»РѕРµ С‡РёСЃР»Рѕ): ");
+                if (scanf("%d", &key) != 1) {
+                    printf("РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ\n");
+                    break;
+                }
+                root = insert_node(root, key);
+                break;
+            }
+            case 3: {
+                printf("Р’РІРµРґРёС‚Рµ РєР»СЋС‡ РґР»СЏ РїРѕРёСЃРєР°: ");
+                if (scanf("%d", &key) != 1) {
+                    printf("РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ\n");
+                    break;
+                }
+                find_node(root, key);
+                break;
+            }
+            case 4: {
+                printf("Р’РІРµРґРёС‚Рµ РєР»СЋС‡ РґР»СЏ СѓРґР°Р»РµРЅРёСЏ: ");
+                if (scanf("%d", &key) != 1) {
+                    printf("РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ РІРІРѕРґ\n");
+                    break;
+                }
+                root = delete_node(root, key);
+                break;
+            }
+            case 5: {
+                printf("Р”РµСЂРµРІРѕ:\n");
+                view_tree(root, 0);
+                break;
+            }
+            case 6: {
+                key_sum = 0;
+                count = 0;
+                traverse_and_sum(root, &key_sum, &count);
+                if (count == 0) {
+                    printf("Р”РµСЂРµРІРѕ РїСѓСЃС‚РѕРµ\n");
+                    break;
+                }
+                float avg = (float)key_sum / count;
+                printf("РЎСЂРµРґРЅРµРµ Р·РЅР°С‡РµРЅРёРµ РєР»СЋС‡РµР№: %.2f\n", avg);
+                
+                // РЎР±РѕСЂ РґР°РЅРЅС‹С… РІ Р±СѓС„РµСЂ
+                count = 0;
+                task(root, avg, buffer, &count);
+                // РЎРѕСЂС‚РёСЂРѕРІРєР° Р±СѓС„РµСЂР° РїРѕ СѓРІРµР»РёС‡РµРЅРёСЋ z=|x-key|
+                sort_buffer(buffer, count);
+                if(count > 0) {
+                    printf("\nРЈР·РµР» СЃ РєР»СЋС‡РѕРј Р±Р»РёР¶Р°Р№С€РёРј Рє СЃСЂРµРґРЅРµРјСѓ:\n");
+                    printf("РљР»СЋС‡: %d, Р¤РРћ: %s, РџР°СЃРїРѕСЂС‚: %d\n",
+                           buffer[0].key, buffer[0].fio, buffer[0].pas_num);
+                }
+                break;
+            }
+            default:
+                printf("РќРµРІРµСЂРЅС‹Р№ РІС‹Р±РѕСЂ. РџРѕРїСЂРѕР±СѓР№С‚Рµ СЃРЅРѕРІР°.\n");
+        }
+        printf("\nРџСЂРѕРґРѕР»Р¶РёС‚СЊ? (Y/N): ");
+        scanf("%s", yn);
+    }
 
-		printf("\nCтрока с ближайшим к среднему значению ключом %d:\n ФИО:%s | №Паспорта:%d", pas_data_b[0].key_b, pas_data_b[0].fio_b, pas_data_b[0].pas_num_b);
-		break;	}
-		default: printf("Нет такого пункта в меню\n\n");
-		}
-
-	m1:
-		fflush(stdin);
-		printf("\n Выйти? д/н:");
-		scanf("%c", yn);
-		OemToCharA(yn, (LPSTR)yn);
-		if (yn[0] != 'д'&&yn[0] != 'н') goto m1; //EXIT?
-	}
+    free_tree(root);
+    return 0;
 }
 
-//создание нового элемента – листа: 
-Tree* List(int i)
-{
-	Tree*t = (Tree*)malloc(sizeof(Tree)); //адрес нового элемента
-	fflush(stdin);
-	t->key = i; //вставляем ключ в новый элемент
-	printf("Введите ФИО: ");
-	scanf("%s", t->pas_data.fio); //вставляем ФИО в новый элемент
-	OemToCharA(t->pas_data.fio, (LPSTR)t->pas_data.fio);
-	printf("\nВведите номер паспорта: ");
-	scanf("%d", &t->pas_data.pas_num); //вставляем № паспорта в новый элемент
-	t->Left = t->Right = NULL; //ветвей пока нет
-	return t;
+/* Р¤СѓРЅРєС†РёСЏ СЃРѕР·РґР°С‘С‚ СѓР·РµР» РґРµСЂРµРІР° Рё РёРЅРёС†РёР°Р»РёР·РёСЂСѓРµС‚ РґР°РЅРЅС‹Рµ */
+TreeNode* create_node(int key) {
+    TreeNode* node = (TreeNode*)malloc(sizeof(TreeNode));
+    if (!node) {
+        perror("РћС€РёР±РєР° РІС‹РґРµР»РµРЅРёСЏ РїР°РјСЏС‚Рё");
+        exit(EXIT_FAILURE);
+    }
+    node->key = key;
+    printf("Р’РІРµРґРёС‚Рµ Р¤РРћ (РґРѕ 19 СЃРёРјРІРѕР»РѕРІ): ");
+    scanf("%19s", node->data.fio);
+    printf("Р’РІРµРґРёС‚Рµ РЅРѕРјРµСЂ РїР°СЃРїРѕСЂС‚Р°: ");
+    scanf("%d", &node->data.pas_num);
+    node->left = node->right = NULL;
+    return node;
 }
 
-//создание дерева/добавление элемента
-Tree* Make(Tree*Root)
-{
-	Tree* Prev, *t; //Prev родитель текущего элемента t (предыдущий)
-	int b, find; //b-ключ элемента, find-индикатор того, что наёдено подходящее место для нового элемента
-	char*yn = (char*)malloc(2 * sizeof(char)); //да/нет
-
-	if (Root == NULL) //Если дерево не создано 
-	{
-		printf("\nВведите ключ: ");
-		scanf("%d", &b);
-		Root = List(b);
-	m2:
-		fflush(stdin);
-		printf("Еще? д/н: ");
-		scanf("%s", yn);
-		OemToCharA(yn, (LPSTR)yn);
-		if (*yn == 'н')
-			goto m3;
-		else
-		{
-			if (*yn != 'д') goto m2;
-		}
-	} //Установили указатель на корень
-
-	while (1) //Формируем остальные элементы дерева
-	{
-		printf("\nВведите ключ: ");
-		scanf("%d", &b);
-		if (b<0) break; //Признак выхода число <0
-		t = Root; //Текущий указатель на корень
-		find = 0; // Признак поиска
-
-		while (t && !find) //пока не упремся в элемент без ветви
-		{
-			Prev = t;
-			if (b == t->key) 	find = 1; //Ключи должны быть уникальны
-			else
-				if (b<t->key) t = t->Left;
-				else   t = t->Right;
-		}
-
-		if (!find) //Нашли место с адресом Prev
-		{
-			Prev = t;
-			t = List(b); //Создаем новый узел
-			if (b<Prev->key) //и присоединяем его, либо
-				Prev->Left = t; //на левую ветвь,
-			else Prev->Right = t;
-		} //либо на правую ветвь
-	m1:
-		fflush(stdin);
-		printf("Еще? д/н: ");
-		scanf("%s", yn);
-		OemToCharA(yn, (LPSTR)yn);
-		if (*yn == 'н')
-			break;
-		else
-		{
-			if (*yn != 'д') goto m1;
-		}
-	} //Конец цикла
-m3:
-	delete(yn);
-	return Root;
+/* Р¤СѓРЅРєС†РёСЏ РІСЃС‚Р°РІРєРё СѓР·Р»Р° РІ Р±РёРЅР°СЂРЅРѕРµ РґРµСЂРµРІРѕ РїРѕРёСЃРєР°.
+   РџСЂРё СЃРѕРІРїР°РґРµРЅРёРё РєР»СЋС‡РµР№ СѓР·РµР» РЅРµ РІСЃС‚Р°РІР»СЏРµС‚СЃСЏ. */
+TreeNode* insert_node(TreeNode* root, int key) {
+    if (root == NULL) {
+        return create_node(key);
+    }
+    if (key < root->key)
+        root->left = insert_node(root->left, key);
+    else if (key > root->key)
+        root->right = insert_node(root->right, key);
+    else
+        printf("РЈР·РµР» СЃ РєР»СЋС‡РѕРј %d СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚.\n", key);
+    return root;
 }
 
-//поиск и вывод информации по ключу
-void Find(Tree*t, int fkey)
-{
-	if (t)
-	{
-		Find(t->Right, fkey);
-		if (t->key == fkey)
-			printf("\nЭлемент с ключом %d: %d %s %d\n", fkey, t->key, t->pas_data.fio, t->pas_data.pas_num);
-		Find(t->Left, fkey);
-	} //Вывод левого поддерева
+/* Р РµРєСѓСЂСЃРёРІРЅС‹Р№ РїРѕРёСЃРє Рё РІС‹РІРѕРґ СѓР·Р»РѕРІ СЃ СѓРєР°Р·Р°РЅРЅС‹Рј РєР»СЋС‡РѕРј */
+void find_node(TreeNode* root, int key) {
+    if (root == NULL)
+        return;
+    if (root->key == key)
+        printf("РќР°Р№РґРµРЅ СѓР·РµР»: РєР»СЋС‡ = %d, Р¤РРћ = %s, РїР°СЃРїРѕСЂС‚ = %d\n",
+               root->key, root->data.fio, root->data.pas_num);
+    if (key <= root->key)
+        find_node(root->left, key);
+    if (key >= root->key)
+        find_node(root->right, key);
 }
 
-//удаление узла по ключу
-Tree* Del(Tree*Root, int fkey)
-{
-	Tree*Del, *Prev_Del, *R, *Prev_R; //Del, Prev_Del – удаляемый элемент и его предыдущий (родитель); 
-									  //R, Prev_R – элемент, на который заменяется удаленный, и его родитель;
-	Del = Root;
-	Prev_Del = NULL;
-	// ===== Поиск удаляемого элемента и его родителя по ключу key =====
-	while (Del != NULL&&Del->key != fkey)
-	{
-		Prev_Del = Del;
-		if (Del->key>fkey)
-			Del = Del->Left;
-		else Del = Del->Right;
-	}
-
-	if (Del == NULL) //Элемент не найден
-	{
-		puts("\n NO Key!");
-		return Root;
-	}
-	// ============ Поиск элемента R для замены =================
-	if (Del->Right == NULL)
-		R = Del->Left;
-	else
-		if (Del->Left == NULL)
-			R = Del->Right;
-		else
-		{
-			Prev_R = Del; //Ищем самый правый узел в левом поддереве
-			R = Del->Left;
-			while (R->Right != NULL)
-			{
-				Prev_R = R;
-				R = R->Right;
-			}
-			if (Prev_R == Del) //Нашли элемент для замены R и его родителя Prev_R
-				R->Right = Del->Right;
-			else
-			{
-				R->Right = Del->Right;
-				Prev_R->Right = R->Left;
-				R->Left = Prev_R;
-			}
-		}
-
-	if (Del == Root)
-		Root = R; //Удаляя корень, заменяем его на R
-	else
-		if (Del->key<Prev_Del->key)
-			Prev_Del->Left = R; //на левую ветвь
-		else
-			Prev_Del->Right = R; //на правую ветвь
-
-	printf("\nУдален элемент с ключом %d\n", Del->key);
-	free(Del);
-	return Root;
+/* Р¤СѓРЅРєС†РёСЏ РїРѕРёСЃРєР° РјРёРЅРёРјР°Р»СЊРЅРѕРіРѕ СѓР·Р»Р° РІ РїСЂР°РІРѕРј РёР»Рё Р»РµРІРѕРј РїРѕРґРґРµСЂРµРІРµ */
+TreeNode* find_min_node(TreeNode* root) {
+    while (root && root->left)
+        root = root->left;
+    return root;
 }
 
-//вывод информации
-void View(Tree*t, int level)
-{
-	if (t)
-	{
-		View(t->Right, level + 1); //Вывод правого поддерева
-		for (int i = 0; i<level; i++)
-			printf("    ");
-		printf("ключ:%d | ФИО:%s | №Паспорта:%d\n", t->key, t->pas_data.fio, t->pas_data.pas_num);
-		View(t->Left, level + 1);
-	} //Вывод левого поддерева
+/* РЈРґР°Р»РµРЅРёРµ СѓР·Р»Р° РїРѕ РєР»СЋС‡Сѓ */
+TreeNode* delete_node(TreeNode* root, int key) {
+    if (root == NULL) {
+        printf("РЈР·РµР» СЃ РєР»СЋС‡РѕРј %d РЅРµ РЅР°Р№РґРµРЅ.\n", key);
+        return NULL;
+    }
+    if (key < root->key)
+        root->left = delete_node(root->left, key);
+    else if (key > root->key)
+        root->right = delete_node(root->right, key);
+    else {
+        // РќР°С€Р»Рё СѓР·РµР» РґР»СЏ СѓРґР°Р»РµРЅРёСЏ
+        if (root->left == NULL) {
+            TreeNode* temp = root->right;
+            printf("РЈРґР°Р»С‘РЅ СѓР·РµР» СЃ РєР»СЋС‡РѕРј %d\n", root->key);
+            free(root);
+            return temp;
+        } else if (root->right == NULL) {
+            TreeNode* temp = root->left;
+            printf("РЈРґР°Р»С‘РЅ СѓР·РµР» СЃ РєР»СЋС‡РѕРј %d\n", root->key);
+            free(root);
+            return temp;
+        } else {
+            // РЈР·РµР» РёРјРµРµС‚ РґРІСѓС… РґРµС‚РµР№, РЅР°С…РѕРґРёРј РЅР°РёРјРµРЅСЊС€РёР№ СѓР·РµР» РІ РїСЂР°РІРѕРј РїРѕРґРґРµСЂРµРІРµ
+            TreeNode* temp = find_min_node(root->right);
+            root->key = temp->key;
+            strcpy(root->data.fio, temp->data.fio);
+            root->data.pas_num = temp->data.pas_num;
+            root->right = delete_node(root->right, temp->key);
+        }
+    }
+    return root;
 }
 
-//вычисление среднего значения ключа
-void Middle(Tree*t, int*ukey_sum, int*uquant)
-{
-	if (t)
-	{
-		Middle(t->Right, ukey_sum, uquant);
-		*(ukey_sum) += t->key;
-		*(uquant) = *(uquant)+1;
-		Middle(t->Left, ukey_sum, uquant);
-	}
-	//return (float)(*(ukey_sum))/(float)(*(uquant));
+/* Р РµРєСѓСЂСЃРёРІРЅР°СЏ С„СѓРЅРєС†РёСЏ РґР»СЏ РІС‹РІРѕРґР° РґРµСЂРµРІР° РІ РєРѕРЅСЃРѕР»СЊ СЃ РѕС‚СЃС‚СѓРїР°РјРё */
+void view_tree(TreeNode* root, int level) {
+    if (root) {
+        view_tree(root->right, level + 1);
+        for (int i = 0; i < level; i++)
+            printf("    ");
+        printf("РљР»СЋС‡: %d | Р¤РРћ: %s | РџР°СЃРїРѕСЂС‚: %d\n", root->key, root->data.fio, root->data.pas_num);
+        view_tree(root->left, level + 1);
+    }
 }
 
-//задание
-void Task(Tree*t, float x, Buffer*pas_data_b, int*uquant)
-{
-	if (t)
-	{
-		Task(t->Right, x, pas_data_b, uquant);
-		pas_data_b[*(uquant)].z = fabs(x - (float)t->key); //вычитаем от среднего значения ключей значение ключа, берем по модулю и записываем в элемент
-														   //записываем данные из элемента дерева в буферную структуру
-		pas_data_b[*(uquant)].key_b = t->key;
-		strcpy(pas_data_b[*(uquant)].fio_b, t->pas_data.fio);
-		pas_data_b[*(uquant)].pas_num_b = t->pas_data.pas_num;
-
-		*(uquant) = *(uquant)+1;
-		Task(t->Left, x, pas_data_b, uquant);
-	}
-	printf("max: %d\n", FindMax(t, t->key));
-	printf("min: %d\n", FindMin(t, t->key));
+/* РћР±С…РѕРґ РґРµСЂРµРІР° РґР»СЏ СЃСѓРјРјРёСЂРѕРІР°РЅРёСЏ РєР»СЋС‡РµР№ Рё РїРѕРґСЃС‡РµС‚Р° СѓР·Р»РѕРІ */
+void traverse_and_sum(TreeNode* root, int* key_sum, int* count) {
+    if (root) {
+        traverse_and_sum(root->left, key_sum, count);
+        *key_sum += root->key;
+        (*count)++;
+        traverse_and_sum(root->right, key_sum, count);
+    }
 }
 
-int FindMax(Tree*t, int max)
-{
-	if (t->key > max) max = t->key;
-	if (t->Left != NULL)
-		max = FindMax(t->Left, max);
-	if (t->Right != NULL)
-		max = FindMax(t->Right, max);
-	return max;
+/* РћР±С…РѕРґ РґРµСЂРµРІР° РґР»СЏ Р·Р°РїРѕР»РЅРµРЅРёСЏ Р±СѓС„РµСЂР° РґР°РЅРЅС‹РјРё, РІС‹С‡РёСЃР»СЏСЏ z = fabs(x - key) */
+void task(TreeNode* root, float x, Buffer buffer[], int* count) {
+    if (root) {
+        task(root->left, x, buffer, count);
+        buffer[*count].key = root->key;
+        buffer[*count].z = fabs(x - (float)root->key);
+        strcpy(buffer[*count].fio, root->data.fio);
+        buffer[*count].pas_num = root->data.pas_num;
+        (*count)++;
+        task(root->right, x, buffer, count);
+    }
 }
 
-int FindMin(Tree*t, int min)
-{
-	if (t->key < min) min = t->key;
-	if (t->Left != NULL)
-		min = FindMax(t->Left, min);
-	if (t->Right != NULL)
-		min = FindMax(t->Right, min);
-	return min;
+/* РЎРѕСЂС‚РёСЂРѕРІРєР° РїСѓР·С‹СЂСЊРєРѕРј Р±СѓС„РµСЂР° РїРѕ РїРѕР»СЋ z */
+void sort_buffer(Buffer buffer[], int count) {
+    for (int i = 0; i < count - 1; i++) {
+        for (int j = 0; j < count - i - 1; j++) {
+            if (buffer[j].z > buffer[j + 1].z) {
+                Buffer tmp = buffer[j];
+                buffer[j] = buffer[j + 1];
+                buffer[j + 1] = tmp;
+            }
+        }
+    }
+}
+
+/* Р РµРєСѓСЂСЃРёРІРЅРѕРµ РЅР°С…РѕР¶РґРµРЅРёРµ РјР°РєСЃРёРјР°Р»СЊРЅРѕРіРѕ Р·РЅР°С‡РµРЅРёСЏ РєР»СЋС‡Р° */
+int find_max(TreeNode* root, int curr_max) {
+    if (root == NULL)
+        return curr_max;
+    if (root->key > curr_max)
+        curr_max = root->key;
+    curr_max = find_max(root->left, curr_max);
+    curr_max = find_max(root->right, curr_max);
+    return curr_max;
+}
+
+/* Р РµРєСѓСЂСЃРёРІРЅРѕРµ РЅР°С…РѕР¶РґРµРЅРёРµ РјРёРЅРёРјР°Р»СЊРЅРѕРіРѕ Р·РЅР°С‡РµРЅРёСЏ РєР»СЋС‡Р° */
+int find_min(TreeNode* root, int curr_min) {
+    if (root == NULL)
+        return curr_min;
+    if (root->key < curr_min)
+        curr_min = root->key;
+    curr_min = find_min(root->left, curr_min);
+    curr_min = find_min(root->right, curr_min);
+    return curr_min;
+}
+
+/* РћСЃРІРѕР±РѕР¶РґРµРЅРёРµ Р·Р°РЅСЏС‚РѕР№ РїР°РјСЏС‚Рё РґРµСЂРµРІР° */
+void free_tree(TreeNode* root) {
+    if (root) {
+        free_tree(root->left);
+        free_tree(root->right);
+        free(root);
+    }
 }
