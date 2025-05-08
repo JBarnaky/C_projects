@@ -1,86 +1,77 @@
-#include <stdio.h>      
-#include <conio.h>     
-#include <process.h>   
-#include <locale.h>     
-#include <malloc.h>    
-#include <windows.h>   
-#include <stdlib.h>
-#include <math.h>
+#include <iostream>
+#include <vector>
+#include <cstdlib>  // Для std::abs
+#include <locale>
+#include <codecvt>
 
-void in(int, int, int **);
-void out(int, int, int **);
-void sumdiag(int, int, int **);
+void in(int n, int m, std::vector<std::vector<int>>& a);
+void out(int n, int m, const std::vector<std::vector<int>>& a);
+void sumdiag(int n, int m, const std::vector<std::vector<int>>& a);
 
-void main()
-{
-	setlocale(LC_CTYPE, "Russian");
+int main() {
+    // Установка русской локали для корректного вывода
+    std::locale::global(std::locale("ru_RU.UTF-8"));
+    std::wcout.imbue(std::locale());
 
-	int i, j, n, m;
-	int **A;
+    int n, m;
+    std::vector<std::vector<int>> A;
 
-	printf("\n ������� ���������� ��������: \n");
-	scanf("%d", &n);
+    std::wcout << L"Введите количество строк: ";
+    if (!(std::wcin >> n) || n <= 0) {
+        std::wcerr << L"Ошибка ввода количества строк.\n";
+        return 1;
+    }
 
-	printf("\n ������� ���������� �����: \n");
-	scanf("%d", &m);
+    std::wcout << L"Введите количество столбцов: ";
+    if (!(std::wcin >> m) || m <= 0) {
+        std::wcerr << L"Ошибка ввода количества столбцов.\n";
+        return 1;
+    }
 
-	if (n == m)
-	{
-		printf("\n ���������� ������� (����� �������������) \n");
-		getch();
-		exit(0);
-	}
+    if (n == m) {
+        std::wcout << L"Матрица квадратная. Программа завершена.\n";
+        std::wcin.get();
+        return 0;
+    }
 
-	A = (int **) malloc(n*sizeof(int*));
-	for (i = 0; i<n; i++)
-	{
-		*(A+i) = (int *)malloc(m * sizeof(int));
-	}
+    // Инициализация матрицы
+    A.resize(n, std::vector<int>(m));
 
-	in(n, m, A);
-	out(n, m, A);
-	sumdiag(n, m, A);
+    in(n, m, A);
+    out(n, m, A);
+    sumdiag(n, m, A);
 
-	for (i = 0; i<n; i++)
-		free (*(A + i));
-	free (A);
-
-	getch();
+    std::wcin.get();
+    return 0;
 }
 
-void in(int n, int m, int **a)
-{
-	int i, j;
-	for (i = 0; i<n; i++)
-		for (j = 0; j<m; j++)
-		{
-			printf("\n a [%d][%d]= ", i, j);
-			scanf("%d", &*(*(a + i) + j));
-		}
+void in(int n, int m, std::vector<std::vector<int>>& a) {
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < m; ++j) {
+            std::wcout << L"a[" << i << L"][" << j << L"] = ";
+            if (!(std::wcin >> a[i][j])) {
+                std::wcerr << L"Ошибка ввода значения.\n";
+                exit(EXIT_FAILURE);
+            }
+        }
+    }
 }
 
-
-void out(int n, int m, int **a)
-{
-	int i, j;
-	for (i = 0; i<n; i++)
-	{
-		printf("\n");
-		for (j = 0; j<m; j++)
-			printf("%d \t ", *(*(a + i) + j));
-	}
+void out(int n, int m, const std::vector<std::vector<int>>& a) {
+    for (int i = 0; i < n; ++i) {
+        std::wcout << L"\n";
+        for (int j = 0; j < m; ++j) {
+            std::wcout << a[i][j] << L"\t";
+        }
+    }
 }
 
-void sumdiag(int n, int m, int **a)
-{
-	int sum = 0;
-	int i, j;
-
-		for (i = 0; i < n; i++)
-			for (j = i+1; j < m; j++)
-				if (i < j)
-				{
-					sum += fabs(*(*(a + i) + j));
-					printf("\n ������������ = %d \n", sum);
-				}
+void sumdiag(int n, int m, const std::vector<std::vector<int>>& a) {
+    int sum = 0;
+    for (int i = 0; i < n; ++i) {
+        for (int j = i + 1; j < m; ++j) {
+            sum += std::abs(a[i][j]);
+        }
+    }
+    std::wcout << L"\nСумма модулей элементов выше главной диагонали: " << sum << L"\n";
 }
