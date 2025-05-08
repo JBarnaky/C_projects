@@ -1,124 +1,91 @@
-#define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
-#include <io.h>
-#include <string.h>
-#include <conio.h>
-#include <locale.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <windows.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <stdexcept>
+#include <locale>
 
-void fwr(char* str);
-void frd(char* str);
-void enc(char* str, char* key);
-void dec(char* str, char* key);
+class FileHandler {
+public:
+    static void writeToFile(const std::string& text) {
+        std::ofstream file("text.txt", std::ios::trunc);
+        if (!file.is_open()) throw std::runtime_error("РћС€РёР±РєР° РѕС‚РєСЂС‹С‚РёСЏ С„Р°Р№Р»Р° РґР»СЏ Р·Р°РїРёСЃРё");
+        file << text;
+    }
 
-int main()
-{
-	setlocale(LC_CTYPE, "Russian");
+    static std::string readFromFile() {
+        std::ifstream file("text.txt");
+        if (!file.is_open()) throw std::runtime_error("РћС€РёР±РєР° РѕС‚РєСЂС‹С‚РёСЏ С„Р°Р№Р»Р° РґР»СЏ С‡С‚РµРЅРёСЏ");
+        return std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    }
 
-	int num;
-	char str[100];
-	char key[100];
+    static void encrypt(const std::string& input, const std::string& key) {
+        std::string encrypted = input;
+        char placeholder = '1';
+        for (size_t i = 0; i < encrypted.size(); i += 2) {
+            if (i < key.size()) {
+                encrypted[i] = placeholder;
+                key[i] = input[i]; // РЎРѕС…СЂР°РЅСЏРµРј РєР»СЋС‡
+            }
+        }
+        writeToFile(encrypted);
+        std::cout << "Р—Р°С€РёС„СЂРѕРІР°РЅРѕ:\n" << encrypted << std::endl;
+    }
 
-	do
-	{
-		printf("Выберите действие: \n 1 - Сформировать с клавиатуры строку  и записать в файл \n 2 - Считать строку из файла и распечатать \n 3 - Зашифровать строку и записать в файл \n 4 - Расшифровать строку и записать в файл \n 5 - Выход \n");
-		scanf("%d", &num);
+    static void decrypt(const std::string& encrypted, const std::string& key) {
+        std::string decrypted = encrypted;
+        char placeholder = '1';
+        for (size_t i = 0; i < decrypted.size(); i += 2) {
+            if (i < key.size() && decrypted[i] == placeholder) {
+                decrypted[i] = key[i];
+            }
+        }
+        writeToFile(decrypted);
+        std::cout << "Р”РµС€РёС„СЂРѕРІР°РЅРѕ:\n" << decrypted << std::endl;
+    }
+};
 
-		switch (num)
-		{
-		case 1:fwr(str);
-			break;
-		case 2:frd(str);
-			break;
-		case 3:enc(str, key);
-			break;
-		case 4:dec(str, key);
-			break;
-		case 5:return 0;
-		default:
-			continue;
-		}
-	}
-	while (1);
-	return 0;
-	_getch();
-}
-void fwr(char* str)
-{
-	FILE *f;
-	if ((f = fopen("D:\\text.txt", "w+t"))==NULL)
-		printf("Файл невозможно создать \n");
-	else
-	{
-		printf("Введите строку : \n");
-		scanf("%c", str);
+int main() {
+    try {
+        std::setlocale(LC_CTYPE, "Russian");
+        int choice;
+        std::string str, key;
 
-		fgets(str, 100, stdin);
-		fputs(str, f);
-		fclose(f);
-	}
-}
-void frd(char* str)
-{
-	FILE *f;
-	if ((f = fopen("D:\\text.txt", "r+t")) == NULL)
-		printf("Файл невозможно открыть \n");
-	else
-	{
-		fgets(str, 100, f);
-		puts(str);
-		fclose(f);
-	}
-}
-void enc(char* str, char* key)
-{
-	int i, len;
-	char c = '1';
-	len = strlen(str);
+        while (true) {
+            std::cout << "РњРµРЅСЋ:\n"
+                      << "1 - Р—Р°РїРёСЃР°С‚СЊ С‚РµРєСЃС‚ РІ С„Р°Р№Р»\n"
+                      << "2 - РџСЂРѕС‡РёС‚Р°С‚СЊ С‚РµРєСЃС‚ РёР· С„Р°Р№Р»Р°\n"
+                      << "3 - Р—Р°С€РёС„СЂРѕРІР°С‚СЊ С‚РµРєСЃС‚\n"
+                      << "4 - Р”РµС€РёС„СЂРѕРІР°С‚СЊ С‚РµРєСЃС‚\n"
+                      << "5 - Р’С‹С…РѕРґ\n";
+            std::cin >> choice;
 
-	FILE *f;
-	if ((f = fopen("D:\\text.txt", "w+t")) == NULL)
-		printf("Файл невозможно создать \n");
-	else
-	{
-		fgets(str, 100, f);
-
-		for (i = 0; i < len; i += 2)
-			(key[i] = str[i]) && (str[i] = c);
-
-		fputs(str, f);
-		printf("Содержимое файла зашифровано \n");
-		puts(str);
-
-		fclose(f);
-	}
-}
-void dec(char* str, char* key)
-{
-	int i, len;
-	char c = '1';
-	len = strlen(str);
-
-	FILE *f;
-	if ((f = fopen("D:\\text.txt", "w+t")) == NULL)
-		printf("Файл невозможно открыть \n");
-	else
-	{
-		fgets(str, 100, f);
-
-		for (i = 0; i < len; i += 2)
-		{
-			if (str[i] = c)
-			{
-				str[i] = key[i];
-			}
-		}
-	}
-	fputs(str, f);
-	printf("Содержимое файла расшифровано \n");
-	puts(str);
-
-	fclose(f);
+            switch (choice) {
+                case 1:
+                    std::cin.ignore();
+                    std::getline(std::cin, str);
+                    FileHandler::writeToFile(str);
+                    break;
+                case 2:
+                    str = FileHandler::readFromFile();
+                    std::cout << "РЎРѕРґРµСЂР¶РёРјРѕРµ С„Р°Р№Р»Р°:\n" << str << std::endl;
+                    break;
+                case 3:
+                    key.clear(); // РћС‡РёСЃС‚РєР° РєР»СЋС‡Р° РїРµСЂРµРґ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј
+                    str = FileHandler::readFromFile();
+                    FileHandler::encrypt(str, key);
+                    break;
+                case 4:
+                    str = FileHandler::readFromFile();
+                    FileHandler::decrypt(str, key);
+                    break;
+                case 5:
+                    return 0;
+                default:
+                    continue;
+            }
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "РћС€РёР±РєР°: " << e.what() << std::endl;
+    }
+    return 0;
 }
