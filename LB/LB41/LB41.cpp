@@ -1,65 +1,67 @@
-#include <stdio.h>
-#include <conio.h>
-#include <math.h>
-#include <process.h>
-#include <locale.h>
-#include <malloc.h>
-#include <stdlib.h>
+#include <iostream>
+#include <vector>
+#include <locale>
+#include <cstdlib>
 
-void read(int*Arr, int n)
-{
-	for (int i=0; i<n; i++)
-	{
-		printf("������� �������� �������� [%d]:\n",i);
-		scanf("%d",(Arr+i));
-	}
-}
-void write(int*Arr, int n)
-{
-	for (int i=0; i<n; i++)
-	{
-		printf("%p = %d ",(Arr+i),*(Arr+i));
-		printf("[%d]\n",i);
-	}
-}
-void Fmax(int*Arr, int n)
-{
-	int i;
-	int max = 0;
-	int pm;
-
-	for (i = 0; i<n; ++i)
-	{
-		if (Arr[i] > max)
-		{
-			max = Arr[i];
-			pm = i;
-		}
-	}
-	int sum = 0;
-	for (i = 0; i<pm; ++i)
-	{
-		if ((Arr[i]>0) && (Arr[i]<max))
-		sum += Arr[i];
-	}
-	printf("\n ����� + ��������� �������, ������������� �� max �������� %d = %d\n", Arr[pm], sum);
+void read(std::vector<int>& arr) {
+    for (size_t i = 0; i < arr.size(); ++i) {
+        std::cout << "Введите элемент массива [" << i << "]: ";
+        std::cin >> arr[i];
+    }
 }
 
-void main()
-{
-	setlocale(LC_CTYPE, "Russian");
-	int *A, M;
+void write(const std::vector<int>& arr) {
+    for (size_t i = 0; i < arr.size(); ++i) {
+        std::cout << &arr[i] << " = " << arr[i] << " [" << i << "]\n";
+    }
+}
 
-	printf("������� ����������� ������� M:");
-	scanf("%d", &M);
+void Fmax(const std::vector<int>& arr) {
+    int max = 0;
+    size_t pm = 0;
+    for (size_t i = 0; i < arr.size(); ++i) {
+        if (arr[i] > max) {
+            max = arr[i];
+            pm = i;
+        }
+    }
+    int sum = 0;
+    for (size_t i = 0; i < pm; ++i) {
+        if (arr[i] > 0 && arr[i] < max) {
+            sum += arr[i];
+        }
+    }
+    std::cout << "\nСумма положительных элементов до максимального " << max << " = " << sum << "\n";
+}
 
-	A = new int[M];
+int main() {
+    try {
+        std::locale::global(std::locale("")); // Установка локали
+        int M;
+        std::cout << "Введите размер массива M: ";
+        std::cin >> M;
 
-	printf("\n ������ A:\n");
-	read(A, M);
-	write(A, M);
-	Fmax(A, M);
+        if (M <= 0) {
+            std::cerr << "Размер массива должен быть положительным.\n";
+            return EXIT_FAILURE;
+        }
 
-	delete[]A;
-	getch();
+        std::vector<int> A(M);
+        std::cout << "\nМассив A:\n";
+        read(A);
+        write(A);
+        Fmax(A);
+
+        std::cout << "\nНажмите Enter для завершения...";
+        std::cin.ignore(); // Очистка буфера
+        std::cin.get();    // Ожидание ввода
+    } catch (const std::exception& e) {
+        std::cerr << "Ошибка: " << e.what() << "\n";
+        return EXIT_FAILURE;
+    } catch (...) {
+        std::cerr << "Неизвестная ошибка.\n";
+        return EXIT_FAILURE;
+    }
+
+    return 0;
 }
