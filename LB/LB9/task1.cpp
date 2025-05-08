@@ -1,157 +1,141 @@
-//	12. Создать список из случайных целых чисел, разделить его на два:
-//	в первый поместить все четные, а во второй – нечетные числа.
-#define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
-#include <locale.h>
-#include <process.h>
+#include <iostream>
+#include <vector>
+#include <memory>
 #include <conio.h>
-#include <malloc.h>
-#include <windows.h>
-#include <stdlib.h>
-#include <math.h>
 
+class Node {
+public:
+    int info;
+    std::unique_ptr<Node> next;
 
+    Node(int val) : info(val), next(nullptr) {}
+};
 
-struct SPIS
-{
-	int info;
-	SPIS*next;
-}
-*begin, *end;
+class LinkedList {
+private:
+    std::unique_ptr<Node> head;
+    std::unique_ptr<Node> tail;
+    size_t count;
 
-void create(SPIS**, SPIS**, int*);  //создание очереди
-void view(SPIS*); //просмотр очереди
-void task(SPIS**, SPIS**, int*); // выполнение задачи
+public:
+    LinkedList() : head(nullptr), tail(nullptr), count(0) {}
 
-int main()
-{
-	setlocale(LC_CTYPE, "Russian");
-	system("cls");
+    ~LinkedList() = default; // РЈРґР°Р»РµРЅРёРµ С‡РµСЂРµР· unique_ptr Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРѕРµ
 
-	char*yn = (char*)malloc(2 * sizeof(char)); // да/нет
-	int n; // номер меню case
-	int quant = 0, *qu = &quant; //число элементов в списке
+    void create() {
+        std::cout << "Enter elements (ESC to exit):" << std::endl;
+        while (true) {
+            int value;
+            if (_kbhit()) {
+                char ch = _getch();
+                if (ch == 27) break; // ESC
+            }
 
-								 //создание очереди
-	begin = NULL; //нет элементов
-	printf("Создание очереди.\n");
-	create(&begin, &end, &quant);
+            std::cin >> value;
+            if (std::cin.fail()) {
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                continue;
+            }
 
-	while (yn[0] != 'д')
-	{
-		fflush(stdin);
-		printf("\nВыберите пункт меню:\n 1) Просмотр списка");
-		printf("\n 2) Добавление элементов в список;");
-		printf("\n 3) Разделить список на два:в первый поместить все четные, а во второй–нечетные числа.\n ");
+            auto node = std::make_unique<Node>(value);
+            if (!head) {
+                head = std::move(node);
+                tail = head.get();
+            } else {
+                tail->next = std::move(node);
+                tail = tail->next.get();
+            }
+            count++;
+        }
+    }
 
-		scanf("%d", &n);
+    void view() const {
+        if (!head) {
+            std::cout << "List is empty!" << std::endl;
+            return;
+        }
 
-		switch (n)
-		{
-		case 1: view(begin);break;
-		case 2: create(&begin, &end, &quant);
-			break;
-		case 3: task(&begin, &end, &quant);
-			printf("\n	Четные и нечетные числа упорядочены\n");break;
-		default: printf("Нет такого пункта в меню\n\n");
-		}
+        for (Node* current = head.get(); current; current = current->next.get()) {
+            std::cout << current->info << " ";
+        }
+        std::cout << std::endl;
+    }
 
-	m1:
-		fflush(stdin);
-		printf("\n Выйти? д/н:");
-		scanf("%c", yn);
-		OemToCharA(yn, (LPSTR)yn);
-		if (yn[0] != 'д'&&yn[0] != 'н') goto m1; //EXIT?
-	}
-	free(yn);
-}
+    void task() {
+        if (!head) {
+            std::cout << "List is empty!" << std::endl;
+            return;
+        }
 
-//создание/добавление очереди
-void create(SPIS**begin, SPIS**end, int*qu)
-{
-	printf("\n Вводите целые числа (ESC-выход в меню): \n");
+        std::vector<int> result;
+        result.reserve(count);
 
-	while (1)
-	{
-		SPIS*t = (SPIS*)malloc(sizeof(SPIS));
-		fflush(stdin);
-		scanf("\n %d", &t->info); //ввод нового числа
-		t->next = NULL; //элемент становится в конец очереди
-		if (*begin == NULL) //если это первый и единственный элемент в очереди
-			*begin = *end = t; //указатели начала и конца принимают адрес текущего элемента 
-		else
-		{
-			(*end)->next = t; // иначе указатель на след элемент в конечном элементе приним. значение текущего
-			*end = t;
-		} // указатель конца очереди принимает адрес текущего элемента
-		(*qu)++; // инкримент счетчика чисел в очереди
-		if (_getch() == 27)	//ESC-выход из цикла
-			break;
-	}
-}
+        // Collect even numbers first
+        for (Node* current = head.get(); current; current = current->next.get()) {
+            if (current->info % 2 == 0) {
+                result.push_back(current->info);
+            }
+        }
 
-//просмотр очереди
-void view(SPIS*begin)
-{
-	SPIS*t = begin; // указатель на текущий элемент принял адрес начала очереди  
-	if (begin == NULL) // проверка очереди
-	{
-		puts("\nСписок пуст!");
-		_getch();
-		return;
-	}
-	while (t != NULL) //пока t не достиг конца очереди
-	{
-		printf(" %d", t->info); // вывод данных
-		t = t->next;
-	} // t принимает адрес следущего элемента
-}
+        // Collect odd numbers
+        for (Node* current = head.get(); current; current = current->next.get()) {
+            if (current->info % 2 != 0) {
+                result.push_back(current->info);
+            }
+        }
 
-//задача
-void task(SPIS**begin, SPIS**end, int*qu)
-{
-	int i = 0;
-	int*mas = (int*)malloc((*qu) * sizeof(int)); //буфферный массив
-												 //проверка
-	SPIS*t = *begin; //в начало
-	if (begin == NULL)
-	{
-		puts("\nСписок пуст!");
-		_getch();
-		return;
-	}
-	//перенос элементов из списка в массив
-	//нечетных чисел
-	while (t != NULL)
-	{
-		if (!(t->info % 2))
-		{
-			*(mas + i) = t->info;
-			i++;
-		}
-		t = t->next;
-	}
+        // Update list values
+        size_t i = 0;
+        for (Node* current = head.get(); current; current = current->next.get()) {
+            if (i < result.size()) {
+                current->info = result[i++];
+            }
+        }
+    }
 
-	//четных чисел
-	t = *begin; //снова в начало
-	while (t != NULL)
-	{
-		if (t->info % 2)
-		{
-			*(mas + i) = t->info;
-			i++;
-		}
-		t = t->next;
-	}
+    size_t getCount() const { return count; }
+};
 
-	//запись новых значений в очередь
-	t = *begin; //снова в начало
+int main() {
+    std::locale::global(std::locale("Russian"));
+    std::setlocale(LC_ALL, "");
 
-	for (int i = 0;i<*qu;i++)
-	{
-		t->info = *(mas + i);
-		t = t->next;
-	}
+    LinkedList list;
+    char choice;
+    bool running = true;
 
-	free(mas);
+    std::cout << "Create initial list." << std::endl;
+    list.create();
+
+    do {
+        std::cout << "\nSelect action:\n"
+                  << "1) View list\n"
+                  << "2) Add elements\n"
+                  << "3) Execute task\n"
+                  << "Enter your choice (1-3) or 'q' to quit: ";
+
+        std::cin >> choice;
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+        switch (choice) {
+            case '1':
+                list.view();
+                break;
+            case '2':
+                list.create();
+                break;
+            case '3':
+                list.task();
+                std::cout << "List reordered: even numbers first, odd numbers last.\n";
+                break;
+            case 'q':
+                running = false;
+                break;
+            default:
+                std::cout << "Invalid choice. Try again.\n";
+        }
+    } while (running);
+
+    return 0;
 }
