@@ -1,39 +1,29 @@
-#include <stdio.h>
-#include <string.h>
-#include <conio.h>
-#include <locale.h>
-#include <ctype.h>
+#include <iostream>
+#include <string>
+#include <locale>
 
-void mod(char* str)
-{
-	int i, len;
-	char c = '&';
-
-	len = strlen(str);
-
-	for (i = 0; i<len; i+=2)
-	
-		if (str[i] == ' ')
-			str[i] = c;
-	
-		printf("Ñ çàìåíîé ïðîáåëîâ: %s \n", str);
-
+void mod(std::string& str) {
+    const char replacement = '&';
+    for (size_t i = 0; i < str.length(); i += 2) {
+        if (str[i] == ' ') {
+            str[i] = replacement;
+        }
+    }
 }
 
-void main()
-{
-	setlocale(LC_CTYPE, "Russian");
+int main() {
+    // Ð£ÑÑ‚Ð°Ð½Ð¾Ð²ÐºÐ° Ñ€ÑƒÑÑÐºÐ¾Ð¹ Ð»Ð¾ÐºÐ°Ð»Ð¸
+    std::locale::global(std::locale("ru_RU.UTF-8"));
+    std::setlocale(LC_CTYPE, "ru_RU.UTF-8");
 
-	char *str;
-	str = new char[100];
+    std::string input;
+    std::cout << "Ð’Ð²ÐµÐ´Ð¸Ñ‚Ðµ ÑÑ‚Ñ€Ð¾ÐºÑƒ: ";
+    std::getline(std::cin, input);
 
-	printf("Ââåäèòå ñòðîêó str: \n");
-	gets_s(str, 100);
+    std::cout << "Ð’Ñ‹ Ð²Ð²ÐµÐ»Ð¸: " << input << std::endl;
 
-	printf("Âû ââåëè: %s \n", str);
-	mod(str);
-	
-	delete[]str;
+    mod(input);
+    std::cout << "Ð¡ Ð·Ð°Ð¼ÐµÐ½Ð¾Ð¹ Ð¿Ñ€Ð¾Ð±ÐµÐ»Ð¾Ð²: " << input << std::endl;
 
-	_getch();
+    return 0;
 }
