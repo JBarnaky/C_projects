@@ -1,64 +1,70 @@
-#include <stdio.h>
-#include <conio.h>
-#include <math.h>
-#include <process.h>
-#include <locale.h>
-#include <malloc.h>
-#include <stdlib.h>
+#include <iostream>
+#include <vector>
+#include <limits>
 
-void read(int*Arr, int n)
-{
-	for (int i=0; i<n; i++)
-	{
-		printf("������� �������� �������� [%d]:\n",i);
-		scanf("%d",(Arr+i));
-	}
-}
-void write(int*Arr, int n)
-{
-	for (int i=0; i<n; i++)
-	{
-		printf("%p = %d ",(Arr+i),*(Arr+i));
-		printf("[%d]\n",i);
-	}
-}
-void Fmax(int*Arr, int n)
-{
-	int pf;
-	int i = 0;
-	int max = Arr[i];
-	for (i = 0; i<n; i++)
-	{
-		if (Arr[i]>0)
-		{
-			max = Arr[i];
-			pf = i;
-		}
-	}
-	int S = 0;
-	for (i = 0; i<pf; i++)
-	{
-		if (Arr[i]>0)
-		S += Arr[i];
-	}
-	printf("\n ����� + ��������� �������, ������������� �� max �������� %.d=%d\n", Arr[pf], S);
+// Функция для ввода элементов массива
+void read(std::vector<int>& arr) {
+    for (size_t i = 0; i < arr.size(); ++i) {
+        std::cout << "Введите элемент [" << i << "]: ";
+        std::cin >> arr[i];
+    }
 }
 
-void main()
-{
-	setlocale(LC_CTYPE, "Russian");
-	int *A, M;
+// Функция для вывода элементов массива
+void write(const std::vector<int>& arr) {
+    for (size_t i = 0; i < arr.size(); ++i) {
+        std::cout << "&arr[" << i << "] = " << &arr[i] << " = " << arr[i] << std::endl;
+    }
+}
 
-	printf("������� ����������� ������� M:");
-	scanf("%d", &M);
+// Функция для поиска максимального положительного элемента и суммы до него
+void findMaxAndSum(const std::vector<int>& arr) {
+    int maxVal = std::numeric_limits<int>::min();
+    size_t maxIndex = 0;
+    int sum = 0;
 
-	A = new int[M];
+    // Поиск максимального положительного элемента
+    for (size_t i = 0; i < arr.size(); ++i) {
+        if (arr[i] > 0 && arr[i] > maxVal) {
+            maxVal = arr[i];
+            maxIndex = i;
+        }
+    }
 
-	printf("\n ������ A:\n");
-	read(A, M);
-	write(A, M);
-	Fmax(A, M);
+    // Проверка на наличие положительных элементов
+    if (maxVal <= 0) {
+        std::cout << "В массиве нет положительных элементов." << std::endl;
+        return;
+    }
 
-	delete[]A;
-	getch();
+    // Суммирование положительных элементов до maxIndex
+    for (size_t i = 0; i < maxIndex; ++i) {
+        if (arr[i] > 0) {
+            sum += arr[i];
+        }
+    }
+
+    std::cout << "Сумма положительных элементов до максимального (" << maxVal << ") = " << sum << std::endl;
+}
+
+int main() {
+    int M;
+    std::vector<int> A;
+
+    std::cout << "Введите размер массива M: ";
+    std::cin >> M;
+
+    if (M <= 0) {
+        std::cerr << "Размер массива должен быть положительным." << std::endl;
+        return 1;
+    }
+
+    A.resize(M);
+
+    std::cout << "\nВвод массива A:" << std::endl;
+    read(A);
+    write(A);
+    findMaxAndSum(A);
+
+    return 0;
 }
