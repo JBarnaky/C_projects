@@ -1,141 +1,153 @@
-//12. Создать список из случайных целых чисел и удалить все элементы, кратные 5.
-#define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
-#include <locale.h>
-#include <process.h>
-#include <conio.h>
-#include <malloc.h>
-#include <windows.h>
-#include <stdlib.h>
-#include <math.h>
+#include <iostream>
+#include <locale>
+#include <conio.h>  // Р”Р»СЏ _getch()
+#include <memory>   // Р”Р»СЏ std::unique_ptr
 
-struct SPIS
-{
-	int info;
-	SPIS*next;
-	SPIS*prev;
-}
-*begin, *end;
+using namespace std;
 
-void create(SPIS**, SPIS**);
-void view(SPIS*);
-void seek_n_destroy(SPIS**, SPIS**);
+class Node {
+public:
+    int info;
+    Node* next;
+    Node* prev;
 
-void main()
-{
-	setlocale(LC_CTYPE, "Russian");
-	system("cls");
+    Node(int value) : info(value), next(nullptr), prev(nullptr) {}
+};
 
-	char*yn = (char*)malloc(2 * sizeof(char)); // да/нет
-	int n; // номер меню case
+class DoublyLinkedList {
+private:
+    Node* begin = nullptr;
+    Node* end = nullptr;
 
-		   //создание очереди
-	printf("Создание очереди.\n");
-	create(&begin, &end);
+public:
+    ~DoublyLinkedList() {
+        clear();
+    }
 
-	while (yn[0] != 'д')
-	{
-		fflush(stdin);
-		printf("\nВыберите пункт меню:\n 1) Просмотр списка");
-		printf("\n 2) Добавление элементов в список;");
-		printf("\n 3) Удалить все элементы, кратные 5.\n ");
+    void create() {
+        cout << "\nР’РІРµРґРёС‚Рµ СЌР»РµРјРµРЅС‚С‹ СЃРїРёСЃРєР° (ESC - Р·Р°РІРµСЂС€РёС‚СЊ): \n";
+        
+        // РЎРѕР·РґР°РЅРёРµ РїРµСЂРІРѕРіРѕ СЌР»РµРјРµРЅС‚Р°
+        if (begin == nullptr) {
+            int value;
+            cout << "Р—РЅР°С‡РµРЅРёРµ РїРµСЂРІРѕРіРѕ СЌР»РµРјРµРЅС‚Р°: ";
+            cin >> value;
+            begin = new Node(value);
+            end = begin;
+            
+            // РџСЂРѕРІРµСЂРєР° РЅР° ESC
+            if (_getch() == 27) return;
+        }
 
-		scanf("%d", &n);
+        // Р”РѕР±Р°РІР»РµРЅРёРµ РїРѕСЃР»РµРґСѓСЋС‰РёС… СЌР»РµРјРµРЅС‚РѕРІ
+        while (true) {
+            int value;
+            cout << "Р—РЅР°С‡РµРЅРёРµ СЃР»РµРґСѓСЋС‰РµРіРѕ СЌР»РµРјРµРЅС‚Р°: ";
+            cin >> value;
+            
+            Node* newNode = new Node(value);
+            newNode->prev = end;
+            end->next = newNode;
+            end = newNode;
+            
+            if (_getch() == 27) break;  // ESC - Р·Р°РІРµСЂС€РёС‚СЊ РІРІРѕРґ
+        }
+    }
 
-		switch (n)
-		{
-		case 1: view(begin);break;
-		case 2: create(&begin, &end);break;
-		case 3: seek_n_destroy(&begin, &end);
-			printf("\n	Удалены элементы, кратные 5ти\n");break;
-		default: printf("Нет такого пункта в меню\n\n");
-		}
+    void view() const {
+        cout << "\nР­Р»РµРјРµРЅС‚С‹ СЃРїРёСЃРєР°: ";
+        for (Node* t = begin; t != nullptr; t = t->next) {
+            cout << t->info << " ";
+        }
+        cout << endl;
+    }
 
-	m1:
-		fflush(stdin);
-		printf("\n Выйти? д/н:");
-		scanf("%c", yn);
-		OemToCharA(yn, (LPSTR)yn);
-		if (yn[0] != 'д'&&yn[0] != 'н') goto m1; //EXIT?
-	}
+    void removeMultiplesOfFive() {
+        Node* current = begin;
+        Node* temp;
+        
+        while (current != nullptr) {
+            Node* nextNode = current->next;
+            
+            if (current->info % 5 == 0) {
+                // РЈРґР°Р»РµРЅРёРµ СѓР·Р»Р°
+                if (current == begin) {
+                    begin = current->next;
+                    if (begin != nullptr) {
+                        begin->prev = nullptr;
+                    }
+                }
+                
+                if (current == end) {
+                    end = current->prev;
+                    if (end != nullptr) {
+                        end->next = nullptr;
+                    }
+                }
+                
+                if (current->prev != nullptr) {
+                    current->prev->next = current->next;
+                }
+                
+                if (current->next != nullptr) {
+                    current->next->prev = current->prev;
+                }
+                
+                delete current;
+            }
+            current = nextNode;
+        }
+    }
 
-}
+    void clear() {
+        while (begin != nullptr) {
+            Node* temp = begin;
+            begin = begin->next;
+            delete temp;
+        }
+        end = nullptr;
+    }
 
-//создание списка
-void create(SPIS**begin, SPIS**end)
-{
-	printf("\n Вводите целые числа (ESC-выход в меню): \n");
-	//первый элемент
-	if (*begin == NULL) // список пуст  
-	{
-		SPIS*t = (SPIS*)malloc(sizeof(SPIS));
-		fflush(stdin);
-		scanf("\n %d", &t->info); //ввод нового числа
-		t->prev = t->next = NULL;
-		*end = *begin = t;
-		if (_getch() == 27) return;
-	}
+    // Р“РµС‚С‚РµСЂС‹ РґР»СЏ С‚РµСЃС‚РёСЂРѕРІР°РЅРёСЏ
+    Node* getBegin() const { return begin; }
+    Node* getEnd() const { return end; }
+};
 
-	//все остальные элементы
-	while (1)
-	{
-		SPIS*t = (SPIS*)malloc(sizeof(SPIS));
-		fflush(stdin);
-		scanf("\n %d", &t->info); //ввод нового числа
-		t->next = NULL; //элемент становится в конец очереди
-		t->prev = *end; //prev указывает на бывший первый
-		(*end)->next = t; //последний принимает адрес текущего
-		*end = t;
-		if (_getch() == 27)	//ESC-выход из цикла
-			break;
-	}
-}
-//просмотр с начала
-void view(SPIS*begin)
-{
-	printf("\n");
-	SPIS*t = begin;
-	while (t != NULL)
-	{
-		printf("%d ", t->info);
-		t = t->next;
-	}
-}
-
-//удаление элементов, кратных 5ти
-void seek_n_destroy(SPIS**begin, SPIS**end)
-{
-	SPIS*z; // буферная переменная
-	SPIS*t = *begin;
-	while (t != NULL)
-	{
-		if (!((t->info) % 5)) //число кратно 5ти
-		{
-			if (t == *begin) //число вначале списка
-			{
-				*begin = (*begin)->next;
-				(*begin)->prev = NULL;
-				free(t);
-				t = *begin;
-			}
-
-			if (t == *end) //число в конце списка
-			{
-				*end = (*end)->prev;
-				(*end)->next = NULL;
-				free(t);
-				break;
-			}
-
-			if (t != *begin&&t != *end)//число в середине списка
-			{
-				(t->prev)->next = t->next; //предыд next = текущему next
-				z = t->next; //адрес следущего элемента
-				(t->next)->prev = t->prev; //след prev = текущему prev
-				free(t);
-				t = z;
-			}
-		}
-		else t = t->next;
-	}
+int main() {
+    setlocale(LC_ALL, "Russian");
+    
+    DoublyLinkedList list;
+    char yn;
+    
+    cout << "РЎРѕР·РґР°РЅРёРµ СЃРїРёСЃРєР°.\n";
+    list.create();
+    
+    do {
+        system("cls");
+        int n;
+        
+        cout << "\nР’С‹Р±РµСЂРёС‚Рµ РґРµР№СЃС‚РІРёРµ:\n"
+             << "1) Р’С‹РІРµСЃС‚Рё СЃРїРёСЃРѕРє\n"
+             << "2) Р”РѕР±Р°РІРёС‚СЊ СЌР»РµРјРµРЅС‚С‹\n"
+             << "3) РЈРґР°Р»РёС‚СЊ СЌР»РµРјРµРЅС‚С‹, РєСЂР°С‚РЅС‹Рµ 5\n"
+             << "Р’С‹Р±РѕСЂ: ";
+        cin >> n;
+        
+        switch (n) {
+            case 1: list.view(); break;
+            case 2: list.create(); break;
+            case 3: 
+                list.removeMultiplesOfFive(); 
+                cout << "\nРЈРґР°Р»РµРЅС‹ СЌР»РµРјРµРЅС‚С‹, РєСЂР°С‚РЅС‹Рµ 5\n"; 
+                break;
+            default: cout << "РќРµРІРµСЂРЅС‹Р№ РІС‹Р±РѕСЂ\n";
+        }
+        
+        cout << "\nРџСЂРѕРґРѕР»Р¶РёС‚СЊ? (Рґ/РЅ): ";
+        cin >> yn;
+        yn = tolower(yn);
+        
+    } while (yn == 'Рґ');
+    
+    return 0;
 }
