@@ -1,77 +1,58 @@
-#include <stdio.h>      
-#include <conio.h>     
-#include <process.h>   
-#include <locale.h>     
-#include <malloc.h>    
-#include <windows.h>   
-#include <stdlib.h>
-#include <math.h>
+#include <iostream>
+#include <vector>
+#include <cstdlib>
+#include <cmath>
 
-void in(int, int, int **);
-void out(int, int, int **);
-void pdiag(int, int, int **);
-
-void main()
-{
-	setlocale(LC_CTYPE, "Russian");
-
-	int i, j, n, m;
-	int **A;
-
-	printf("\n ������� ���������� ��������: \n");
-	scanf("%d", &n);
-
-	printf("\n ������� ���������� �����: \n");
-	scanf("%d", &m);
-
-	A = new int *[n];
-	for (i = 0; i<n; i++)
-	{
-		*(A + i) = new int[n];
-	}
-
-	in(n, m, A);
-	out(n, m, A);
-	pdiag(n, m, A);
-
-	for (i = 0; i<n; i++)
-		delete[](*(A + i));
-	delete[] A;
-
-	getch();
+// Функция для ввода элементов матрицы
+void inputMatrix(int n, int m, std::vector<std::vector<int>>& matrix) {
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < m; ++j) {
+            std::cout << "matrix[" << i << "][" << j << "] = ";
+            std::cin >> matrix[i][j];
+        }
+    }
 }
 
-void in(int n, int m, int **a)
-{
-	int i, j;
-	for (i = 0; i<n; i++)
-		for (j = 0; j<m; j++)
-		{
-			printf("\n a [%d][%d]= ", i, j);
-			scanf("%d", &*(*(a + i) + j));
-		}
+// Функция для вывода матрицы
+void outputMatrix(int n, int m, const std::vector<std::vector<int>>& matrix) {
+    for (int i = 0; i < n; ++i) {
+        for (int j = 0; j < m; ++j) {
+            std::cout << matrix[i][j] << "\t";
+        }
+        std::cout << std::endl;
+    }
 }
 
+// Функция для вычисления произведения элементов главной диагонали
+void productDiagonal(int n, int m, const std::vector<std::vector<int>>& matrix) {
+    if (n != m) {
+        std::cerr << "Матрица не квадратная, произведение диагонали невозможно." << std::endl;
+        return;
+    }
 
-void out(int n, int m, int **a)
-{
-	int i, j;
-	for (i = 0; i<n; i++)
-	{
-		printf("\n");
-		for (j = 0; j<m; j++)
-			printf("%d \t ", *(*(a + i) + j));
-	}
+    int product = 1;
+    for (int i = 0; i < n; ++i) {
+        product *= matrix[i][i];
+    }
+    std::cout << "Произведение диагонали = " << product << std::endl;
 }
 
-void pdiag(int n, int m, int **a)
-{
-	int s = 1;
-	int i;
-	if (n == m)
-	{
-		for (i = 0; i < n; i++)
-			s *= *(*(a + i) + i);
-		printf("\n ������������ = %d \n", s);
-	}
+int main() {
+    int n, m;
+
+    std::cout << "Введите количество строк матрицы: ";
+    std::cin >> n;
+
+    std::cout << "Введите количество столбцов матрицы: ";
+    std::cin >> m;
+
+    // Использование std::vector для автоматического управления памятью
+    std::vector<std::vector<int>> matrix(n, std::vector<int>(m));
+
+    inputMatrix(n, m, matrix);
+    outputMatrix(n, m, matrix);
+    productDiagonal(n, m, matrix);
+
+    std::cin.get(); // Замена getch() для портируемости
+    return 0;
 }
