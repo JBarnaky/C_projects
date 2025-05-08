@@ -1,314 +1,213 @@
-//12. Найти среднее значение всех ключей дерева и найти строку, имеющую ближайший к этому значению ключ.
-#include <stdio.h>
-#include <locale.h>
-#include <process.h>
-#include <conio.h>
-#include <malloc.h>
-#include <windows.h>
-#include <stdlib.h>
-#include <math.h>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <cmath>
+#include <limits>
 
+using namespace std;
 
-
-//Декларация шаблона
-struct Tree
-{
-	struct info
-	{
-		char fio[20];
-		int pas_num;
-	} pas_data;
-	int key;
-	Tree *Left, *Right;
+// РЎС‚СЂСѓРєС‚СѓСЂР° РґР°РЅРЅС‹С… РїР°СЃСЃР°Р¶РёСЂР°
+struct Passenger {
+    string fio;
+    int passportNumber;
 };
 
-//Буфферная структура
-struct Buffer
-{
-	int key_b;
-	float z; //разница ключа и среднего значения ключа по модулю z=|x-key|
-	char fio_b[20];
-	int pas_num_b;
-} pas_data_b[30], b;
+// РЈР·РµР» РґРµСЂРµРІР°
+class TreeNode {
+public:
+    int key;
+    Passenger data;
+    TreeNode* left;
+    TreeNode* right;
 
-Tree* List(int); //добавление листа дерева
-Tree* Make(Tree*); //создание дерева
-void Find(Tree*, int); //поиск информации по ключу
-void View(Tree*, int); //просмотр информации
-Tree* Del(Tree*, int); //удаление узла по ключу
-void Middle(Tree*, int*, int*); //данные для среднего значения ключа
-void Task(Tree*, float, Buffer*, int*);
+    TreeNode(int k, const string& f, int pn) : key(k), data{f, pn}, left(nullptr), right(nullptr) {}
+};
 
-void main()
-{
-	setlocale(LC_CTYPE, "Russian");
-	system("cls");
-	char*yn = (char*)malloc(2 * sizeof(char)); // да/нет
-	int n; //номер меню case
-	int level = 0; //уровень корня
-	int fkey; //ключ поиска
-	int key_sum = 0, *ukey_sum = &key_sum;
-	int quant = 0, *uquant = &quant;
+// РћСЃРЅРѕРІРЅРѕР№ РєР»Р°СЃСЃ РґРµСЂРµРІР°
+class BinaryTree {
+private:
+    TreeNode* root;
 
-	Tree*Root = NULL;	//Указатель корня
+    // Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Рµ С„СѓРЅРєС†РёРё
+    void insertNode(TreeNode*&, int, const string&, int);
+    TreeNode* deleteNode(TreeNode*, int);
+    TreeNode* findMin(TreeNode*);
+    void inorderTraversal(TreeNode*, int);
+    void findKey(TreeNode*, int);
+    void calculateSumAndCount(TreeNode*, int&, int&);
+    void collectData(TreeNode*, float, vector<Passenger>&);
 
-	while (yn[0] != 'д')
-	{
-		fflush(stdin);
-		puts("1 – создание дерева");
-		puts("2 – добавление новой записи");
-		puts("3 – поиск информации по заданному ключу");
-		puts("4 – удаление узла с заданным ключом");
-		puts("5 – вывод информации");
-		puts("6 – Найти среднее значение всех ключей дерева и найти строку, имеющую ближайший к этому значению ключ.");
+public:
+    BinaryTree() : root(nullptr) {}
+    void insert(int, const string&, int);
+    void remove(int);
+    void display();
+    void search(int);
+    void task6();
+};
 
-		scanf("%d", &n);
-
-		switch (n)
-		{
-		case 1: Root = Make(Root);break;
-		case 2: Make(Root);break;
-		case 3:
-		{	fflush(stdin);
-		printf("Введите ключ узла: ");
-		scanf("%d", &fkey);
-		Find(Root, fkey);
-		break;	}
-		case 4:
-		{	fflush(stdin);
-		printf("Введите ключ удаляемого узла: ");
-		scanf("%d", &fkey);
-		Del(Root, fkey);
-		break;	}
-		case 5: View(Root, level);break;
-		case 6:
-		{	Middle(Root, &key_sum, &quant); //данные для среднего значения ключа
-		float x = (float)key_sum / (float)quant; //вычисление среднего значения ключа
-		fflush(stdin);
-		printf("\nСреднее значение ключа: %.2f", x);
-		quant = 0;
-		Task(Root, x, pas_data_b, &quant);
-
-		//сортировка по z=|x-key|
-		for (int i = 0;i<quant;i++)
-		{
-			for (int j = i;j<quant;j++)
-				if (pas_data_b[i].z>pas_data_b[j].z)
-				{
-					b = pas_data_b[i];
-					pas_data_b[i] = pas_data_b[j];
-					pas_data_b[j] = b;
-				}
-		}
-
-		printf("\nCтрока с ближайшим к среднему значению ключом %d:\n ФИО:%s | №Паспорта:%d", pas_data_b[0].key_b, pas_data_b[0].fio_b, pas_data_b[0].pas_num_b);
-
-		break;	}
-
-		default: printf("Нет такого пункта в меню\n\n");
-		}
-
-	m1:
-		fflush(stdin);
-		printf("\n Выйти? д/н:");
-		scanf("%c", yn);
-		OemToCharA(yn, (LPSTR)yn);
-		if (yn[0] != 'д'&&yn[0] != 'н') goto m1; //EXIT?
-	}
-
+// Р’СЃС‚Р°РІРєР° СѓР·Р»Р°
+void BinaryTree::insertNode(TreeNode*& node, int key, const string& fio, int passport) {
+    if (!node) {
+        node = new TreeNode(key, fio, passport);
+    } else if (key < node->key) {
+        insertNode(node->left, key, fio, passport);
+    } else {
+        insertNode(node->right, key, fio, passport);
+    }
 }
 
-//создание нового элемента – листа: 
-Tree* List(int i)
-{
-	Tree*t = (Tree*)malloc(sizeof(Tree)); //адрес нового элемента
-	fflush(stdin);
-	t->key = i; //вставляем ключ в новый элемент
-	printf("Введите ФИО: ");
-	gets(t->pas_data.fio); //вставляем ФИО в новый элемент
-	OemToCharA(t->pas_data.fio, (LPSTR)t->pas_data.fio);
-	printf("Введите номер паспорта: ");
-	scanf("%d", &t->pas_data.pas_num); //вставляем №паспорта в новый элемент
-	t->Left = t->Right = NULL; //втвей пока нет
-	return t;
+// РЈРґР°Р»РµРЅРёРµ СѓР·Р»Р°
+TreeNode* BinaryTree::deleteNode(TreeNode* root, int key) {
+    if (!root) return root;
+
+    if (key < root->key) {
+        root->left = deleteNode(root->left, key);
+    } else if (key > root->key) {
+        root->right = deleteNode(root->right, key);
+    } else {
+        if (!root->left) {
+            TreeNode* temp = root->right;
+            delete root;
+            return temp;
+        } else if (!root->right) {
+            TreeNode* temp = root->left;
+            delete root;
+            return temp;
+        }
+
+        TreeNode* temp = findMin(root->right);
+        root->key = temp->key;
+        root->data = temp->data;
+        root->right = deleteNode(root->right, temp->key);
+    }
+    return root;
 }
 
-//создание дерева/добавление элемента
-Tree* Make(Tree*Root)
-{
-	Tree*Prev, *t; //Prev родитель текущего элемента t (предыдущий)
-	int b, find; //b-ключ элемента, find-индикатор того, что наёдено подходящее место для нового элемента
-	char*yn = (char*)malloc(2 * sizeof(char)); //да/нет
-
-	if (Root == NULL) //Если дерево не создано 
-	{
-		printf("\nВведите ключ: ");
-		scanf("%d", &b);
-		Root = List(b);
-	m2:
-		fflush(stdin);
-		printf("Еще? д/н: ");
-		scanf("%s", yn);
-		OemToCharA(yn, (LPSTR)yn);
-		if (*yn == 'н')
-			goto m3;
-		else
-		{
-			if (*yn != 'д') goto m2;
-		}
-	} //Установили указатель на корень
-
-	while (1) //Формируем остальные элементы дерева
-	{
-		printf("\nВведите ключ: ");
-		scanf("%d", &b);
-		if (b<0) break; //Признак выхода число <0
-		t = Root; //Текущий указатель на корень
-		find = 0; // Признак поиска
-
-		while (t && !find) //пока не упремся в элемент без ветви
-		{
-			Prev = t;
-			if (b == t->key) 	find = 1; //Ключи должны быть уникальны
-			else
-				if (b<t->key) t = t->Left;
-				else   t = t->Right;
-		}
-
-		if (!find) //Нашли место с адресом Prev
-		{
-			t = List(b); //Создаем новый узел
-			if (b<Prev->key) //и присоединяем его, либо
-				Prev->Left = t; //на левую ветвь,
-			else Prev->Right = t;
-		} //либо на правую ветвь
-	m1:
-		fflush(stdin);
-		printf("Еще? д/н: ");
-		scanf("%s", yn);
-		OemToCharA(yn, (LPSTR)yn);
-		if (*yn == 'н')
-			break;
-		else
-		{
-			if (*yn != 'д') goto m1;
-		}
-	}	 //Конец цикла
-m3:
-	delete(yn);
-	return Root;
+// РќР°Р№С‚Рё РјРёРЅРёРјР°Р»СЊРЅС‹Р№ СѓР·РµР»
+TreeNode* BinaryTree::findMin(TreeNode* node) {
+    while (node->left) node = node->left;
+    return node;
 }
 
-//поиск и вывод информации по ключу
-void Find(Tree*t, int fkey)
-{
-	if (t)
-	{
-		Find(t->Right, fkey);
-		if (t->key == fkey)
-			printf("\nЭлемент с ключом %d: %d %s %d\n", fkey, t->key, t->pas_data.fio, t->pas_data.pas_num);
-		Find(t->Left, fkey);
-	} //Вывод левого поддерева
+// РћР±С…РѕРґ РґРµСЂРµРІР° (СЃРёРјРјРµС‚СЂРёС‡РЅС‹Р№)
+void BinaryTree::inorderTraversal(TreeNode* node, int level) {
+    if (node) {
+        inorderTraversal(node->right, level + 1);
+        for (int i = 0; i < level; ++i) cout << "    ";
+        cout << "Key:" << node->key << " | FIO:" << node->data.fio << " | Passport:" << node->data.passportNumber << endl;
+        inorderTraversal(node->left, level + 1);
+    }
 }
 
-//удаление узла по ключу
-Tree* Del(Tree*Root, int fkey)
-{
-	Tree*Del, *Prev_Del, *R, *Prev_R; //Del, Prev_Del – удаляемый элемент и его предыдущий (родитель); 
-									  //R, Prev_R – элемент, на который заменяется удаленный, и его родитель;
-	Del = Root;
-	Prev_Del = NULL;
-	// ===== Поиск удаляемого элемента и его родителя по ключу key =====
-	while (Del != NULL&&Del->key != fkey)
-	{
-		Prev_Del = Del;
-		if (Del->key>fkey)
-			Del = Del->Left;
-		else Del = Del->Right;
-	}
-
-	if (Del == NULL) //Элемент не найден
-	{
-		puts("\n NO Key!");
-		return Root;
-	}
-	// ============ Поиск элемента R для замены =================
-	if (Del->Right == NULL)
-		R = Del->Left;
-	else
-		if (Del->Left == NULL)
-			R = Del->Right;
-		else
-		{
-			Prev_R = Del; //Ищем самый правый узел в левом поддереве
-			R = Del->Left;
-			while (R->Right != NULL)
-			{
-				Prev_R = R;
-				R = R->Right;
-			}
-			if (Prev_R == Del) //Нашли элемент для замены R и его родителя Prev_R
-				R->Right = Del->Right;
-			else
-			{
-				R->Right = Del->Right;
-				Prev_R->Right = R->Left;
-				R->Left = Prev_R;
-			}
-		}
-
-	if (Del == Root)
-		Root = R;	//Удаляя корень, заменяем его на R
-	else
-		if (Del->key<Prev_Del->key)
-			Prev_Del->Left = R; //на левую ветвь
-		else
-			Prev_Del->Right = R; //на правую ветвь
-
-	printf("\nУдален элемент с ключом %d\n", Del->key);
-	free(Del);
-	return Root;
+// РџРѕРёСЃРє СѓР·Р»Р° РїРѕ РєР»СЋС‡Сѓ
+void BinaryTree::findKey(TreeNode* node, int key) {
+    if (node) {
+        findKey(node->right, key);
+        if (node->key == key) {
+            cout << "Found in key " << key << ": " << node->key << " " << node->data.fio << " " << node->data.passportNumber << endl;
+        }
+        findKey(node->left, key);
+    }
 }
 
-//вывод информации
-void View(Tree*t, int level)
-{
-	if (t)
-	{
-		View(t->Right, level + 1); //Вывод правого поддерева
-		for (int i = 0; i<level; i++)
-			printf("    ");
-		printf("ключ:%d | ФИО:%s | №Паспорта:%d\n", t->key, t->pas_data.fio, t->pas_data.pas_num);
-		View(t->Left, level + 1);
-	} //Вывод левого поддерева
+// Р’С‹С‡РёСЃР»РµРЅРёРµ СЃСѓРјРјС‹ РєР»СЋС‡РµР№ Рё РєРѕР»РёС‡РµСЃС‚РІР° СѓР·Р»РѕРІ
+void BinaryTree::calculateSumAndCount(TreeNode* node, int& sum, int& count) {
+    if (node) {
+        calculateSumAndCount(node->right, sum, count);
+        sum += node->key;
+        ++count;
+        calculateSumAndCount(node->left, sum, count);
+    }
 }
 
-//вычисление среднего значения ключа
-void Middle(Tree*t, int*ukey_sum, int*uquant)
-{
-	if (t)
-	{
-		Middle(t->Right, ukey_sum, uquant);
-		*(ukey_sum) += t->key;
-		*(uquant) = *(uquant)+1;
-		Middle(t->Left, ukey_sum, uquant);
-	}
-	//return (float)(*(ukey_sum))/(float)(*(uquant));
+// РЎР±РѕСЂ РґР°РЅРЅС‹С… РґР»СЏ Р·Р°РґР°С‡Рё 6
+void BinaryTree::collectData(TreeNode* node, float mean, vector<Passenger>& buffer) {
+    if (node) {
+        collectData(node->right, mean, buffer);
+        float diff = abs(mean - node->key);
+        buffer.push_back({node->data.fio, node->data.passportNumber});
+        collectData(node->left, mean, buffer);
+    }
 }
 
-//задание часть 1
-void Task(Tree*t, float x, Buffer*pas_data_b, int*uquant)
-{
-	if (t)
-	{
-		Task(t->Right, x, pas_data_b, uquant);
-		pas_data_b[*(uquant)].z = fabs(x - (float)t->key); //вычитаем от среднего значения ключей значение ключа, берем по модулю и записываем в элемент
-														   //записываем данные из элемента дерева в буферную структуру
-		pas_data_b[*(uquant)].key_b = t->key;
-		strcpy(pas_data_b[*(uquant)].fio_b, t->pas_data.fio);
-		pas_data_b[*(uquant)].pas_num_b = t->pas_data.pas_num;
+// РџСѓР±Р»РёС‡РЅС‹Рµ РјРµС‚РѕРґС‹
+void BinaryTree::insert(int key, const string& fio, int passport) {
+    insertNode(root, key, fio, passport);
+}
 
-		*(uquant) = *(uquant)+1;
-		Task(t->Left, x, pas_data_b, uquant);
-	}
+void BinaryTree::remove(int key) {
+    root = deleteNode(root, key);
+}
+
+void BinaryTree::display() {
+    inorderTraversal(root, 0);
+}
+
+void BinaryTree::search(int key) {
+    findKey(root, key);
+}
+
+void BinaryTree::task6() {
+    int sum = 0, count = 0;
+    calculateSumAndCount(root, sum, count);
+    float mean = static_cast<float>(sum) / count;
+
+    vector<Passenger> buffer;
+    collectData(root, mean, buffer);
+
+    // РЎРѕСЂС‚РёСЂРѕРІРєР° РїРѕ СЂР°Р·РЅРёС†Рµ (СЂРµР°Р»РёР·Р°С†РёСЏ СЃРѕСЂС‚РёСЂРѕРІРєРё РѕРїСѓС‰РµРЅР° РґР»СЏ РєСЂР°С‚РєРѕСЃС‚Рё)
+    if (!buffer.empty()) {
+        cout << "Passenger with minimal deviation: " << buffer[0].fio << ", " << buffer[0].passportNumber << endl;
+    }
+}
+
+// РћСЃРЅРѕРІРЅР°СЏ С„СѓРЅРєС†РёСЏ
+int main() {
+    BinaryTree tree;
+    int choice, key, passport;
+    string fio;
+    bool running = true;
+
+    while (running) {
+        cout << "1. Insert\n2. Display\n3. Search\n4. Delete\n5. Task6\n6. Exit\nChoose: ";
+        cin >> choice;
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        switch (choice) {
+            case 1:
+                cout << "Enter key: ";
+                cin >> key;
+                cin.ignore();
+                cout << "Enter FIO: ";
+                getline(cin, fio);
+                cout << "Enter passport number: ";
+                cin >> passport;
+                tree.insert(key, fio, passport);
+                break;
+            case 2:
+                tree.display();
+                break;
+            case 3:
+                cout << "Enter key to search: ";
+                cin >> key;
+                tree.search(key);
+                break;
+            case 4:
+                cout << "Enter key to delete: ";
+                cin >> key;
+                tree.remove(key);
+                break;
+            case 5:
+                tree.task6();
+                break;
+            case 6:
+                running = false;
+                break;
+            default:
+                cout << "Invalid choice.\n";
+        }
+    }
+
+    return 0;
 }
