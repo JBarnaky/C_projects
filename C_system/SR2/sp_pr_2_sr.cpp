@@ -1,239 +1,172 @@
 #include <windows.h>
 #include <windowsx.h>
-#include <tchar.h>
-#include <string.h>
+#include <string>
+#include <vector>
 
+using namespace std;
 
+// РЎС‚СЂСѓРєС‚СѓСЂР° РґР»СЏ С…СЂР°РЅРµРЅРёСЏ РёРЅС„РѕСЂРјР°С†РёРё Рѕ С†РІРµС‚Рµ Рё С‚РµРєСЃС‚Рµ
+struct ColorEntry {
+    COLORREF color;
+    string text;
+};
 
-LRESULT CALLBACK Pr2_WndProc(HWND, UINT, WPARAM, LPARAM);
+class WinApp {
+public:
+    WinApp(HINSTANCE hInst) : hInstance(hInst), hWnd(nullptr), hButtonAdd(nullptr), hButtonExit(nullptr), hStat(nullptr), hListBox(nullptr) {}
 
-LPCTSTR g_lpszClassName = TEXT("sp_pr2_sr_class"); //имя класса
-LPCTSTR g_lpszAplicationTitle = TEXT("Цвета радуги. Программист <Яцкевич, Павел>");
+    int Run() {
+        WNDCLASSEX wc = {};
+        wc.cbSize = sizeof(WNDCLASSEX);
+        wc.lpszClassName = TEXT("sp_pr2_sr_class");
+        wc.lpfnWndProc = WndProc;
+        wc.style = CS_VREDRAW | CS_HREDRAW;
+        wc.hInstance = hInstance;
+        wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+        wc.hCursor = LoadCursor(NULL, IDC_ARROW);
+        wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 7);
+        wc.cbClsExtra = 0;
+        wc.cbWndExtra = 0;
 
-HINSTANCE hInstance;
+        if (!RegisterClassEx(&wc)) {
+            MessageBox(NULL, TEXT("РћС€РёР±РєР° СЂРµРіРёСЃС‚СЂР°С†РёРё РєР»Р°СЃСЃР°!"), TEXT("РћС€РёР±РєР°"), MB_OK | MB_ICONERROR);
+            return FALSE;
+        }
 
-int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpszCmdLine, int nCmdShow)
+        hWnd = CreateWindowEx(0, wc.lpszClassName, TEXT("РџСЂРёРјРµСЂ РїСЂРёР»РѕР¶РµРЅРёСЏ. Р’С‹Р±РѕСЂ С†РІРµС‚Р° <Р¤Р°РјРёР»РёСЏ, РРјСЏ>"), WS_OVERLAPPEDWINDOW, 0, 0, 700, 700, NULL, NULL, hInstance, this);
 
-{
-	WNDCLASSEX wc;
-	MSG msg;
-	HWND hWnd;
+        if (!hWnd) {
+            MessageBox(NULL, TEXT("РћРєРЅРѕ РЅРµ СЃРѕР·РґР°РЅРѕ!"), TEXT("РћС€РёР±РєР°"), MB_OK | MB_ICONERROR);
+            return FALSE;
+        }
 
-	memset(&wc, 0, sizeof(WNDCLASSEX));
-	wc.cbSize = sizeof(WNDCLASSEX);
-	wc.lpszClassName = g_lpszClassName;
-	wc.lpfnWndProc = Pr2_WndProc;
-	wc.style = CS_VREDRAW | CS_HREDRAW;
-	wc.hInstance = hInstance;
-	wc.hIcon = LoadIcon(NULL, MAKEINTRESOURCE(IDI_APPLICATION));    
-	wc.hCursor = LoadCursor(NULL, MAKEINTRESOURCE(IDC_ARROW));
-	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 7);
-	wc.lpszMenuName = NULL;
-	wc.cbClsExtra = 0;
-	wc.cbWndExtra = 0;
+        ShowWindow(hWnd, SW_SHOW);
+        UpdateWindow(hWnd);
 
-	if (!RegisterClassEx(&wc))
-	{
-		MessageBox(NULL, TEXT("Ошибка регистрации класса окна!"), TEXT("Ошибка"), MB_OK | MB_ICONERROR);
-		return FALSE;
-	}
+        MSG msg;
+        while (GetMessage(&msg, NULL, 0, 0)) {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
 
-	hWnd = CreateWindowEx(NULL, g_lpszClassName, g_lpszAplicationTitle, WS_OVERLAPPEDWINDOW, 0, 0, 700, 700, NULL, NULL, hInstance, NULL);
+        return (int)msg.wParam;
+    }
 
-	if (!hWnd)
-	{
-		MessageBox(NULL, TEXT("Окно не создано!"), TEXT("Ошибка"), MB_OK | MB_ICONERROR);
-		return FALSE;
-	}
-	ShowWindow(hWnd, nCmdShow);
+    static LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+        WinApp* pThis = nullptr;
+        if (msg == WM_NCCREATE) {
+            CREATESTRUCT* cs = reinterpret_cast<CREATESTRUCT*>(lParam);
+            pThis = reinterpret_cast<WinApp*>(cs->lpCreateParams);
+            SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pThis));
+        }
+        else {
+            pThis = reinterpret_cast<WinApp*>(GetWindowLongPtr(hwnd, GWLP_USERDATA));
+        }
 
-	UpdateWindow(hWnd);
+        if (pThis) {
+            return pThis->HandleMessage(hwnd, msg, wParam, lParam);
+        }
+        else {
+            return DefWindowProc(hwnd, msg, wParam, lParam);
+        }
+    }
 
-	while (GetMessage(&msg, (HWND)NULL, 0, 0))
+private:
+    HINSTANCE hInstance;
+    HWND hWnd;
+    HWND hButtonAdd;
+    HWND hButtonExit;
+    HWND hStat;
+    HWND hListBox;
+    vector<ColorEntry> colorEntries = {
+        {RGB(255,0,0), "РљСЂР°СЃРЅС‹Р№"},
+        {RGB(255,125,0), "РћСЂР°РЅР¶РµРІС‹Р№"},
+        {RGB(255,255,0), "Р–РµР»С‚С‹Р№"},
+        {RGB(0,255,0), "Р—РµР»РµРЅС‹Р№"},
+        {RGB(0,255,255), "Р“РѕР»СѓР±РѕР№"},
+        {RGB(0,0,255), "РЎРёРЅРёР№"},
+        {RGB(125,0,255), "Р¤РёРѕР»РµС‚РѕРІС‹Р№"}
+    };
 
-	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
+    LRESULT HandleMessage(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+        switch (msg) {
+        case WM_CREATE:
+            InitializeControls(hwnd);
+            return 0;
 
-	return msg.wParam;
-}
-// Оконная процедура
+        case WM_COMMAND:
+            HandleCommand(wParam);
+            return 0;
 
-LRESULT CALLBACK Pr2_WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+        case WM_PAINT:
+            HandlePaint();
+            return 0;
 
-{
+        case WM_DESTROY:
+            PostQuitMessage(IDCANCEL);
+            return 0;
 
-	int wmld, wmEvent;
-	HDC hdc;
+        default:
+            return DefWindowProc(hwnd, msg, wParam, lParam);
+        }
+    }
 
-	
-	static HWND hButtonAdd;
-	static HWND hButtonExit;
-	static HWND hStat;
-	static HWND hListBox;
+    void InitializeControls(HWND parent) {
+        hStat = CreateWindowEx(0, TEXT("static"), TEXT("Р’С‹Р±РѕСЂ С†РІРµС‚Р°"), WS_CHILD | WS_CAPTION | WS_VISIBLE | WS_SIZEBOX,
+            300, 50, 150, 80, parent, (HMENU)0, hInstance, NULL);
 
+        hListBox = CreateWindowEx(0, TEXT("listbox"), TEXT("РЎРїРёСЃРѕРє С†РІРµС‚РѕРІ"), WS_CHILD | WS_CAPTION | WS_VISIBLE | WS_SIZEBOX |
+            WS_HSCROLL | WS_VSCROLL, 20, 50, 160, 250, parent, (HMENU)103, hInstance, NULL);
 
-#define IDC_BTN_ADD 101
-#define IDC_LISTBOX 103
+        for (const auto& entry : colorEntries) {
+            SendMessage(hListBox, LB_ADDSTRING, 0, reinterpret_cast<LPARAM>(entry.text.c_str()));
+        }
+        SendMessage(hListBox, LB_SETCURSEL, 0, 0L);
 
-	
+        hButtonAdd = CreateWindowEx(0, TEXT("button"), TEXT("Р”РѕР±Р°РІРёС‚СЊ"), WS_CHILD | WS_BORDER | WS_VISIBLE, 120, 350, 90, 30, parent,
+            (HMENU)101, hInstance, NULL);
 
-	switch (msg)
-	{
-	case WM_CREATE:
-	{
+        hButtonExit = CreateWindowEx(0, TEXT("button"), TEXT("Р’С‹С…РѕРґ"), WS_CHILD | WS_BORDER | WS_VISIBLE, 250, 350, 90, 30, parent,
+            (HMENU)IDCANCEL, hInstance, NULL);
+    }
 
-					  if (!(hStat = CreateWindowEx(0L, TEXT("static"), TEXT("Результат"), WS_CHILD | WS_CAPTION | WS_VISIBLE | WS_SIZEBOX,
-						  300, 50, 150, 80, hWnd, (HMENU)0, hInstance, NULL))) return (-1);
-					  
+    void HandleCommand(WPARAM wParam) {
+        int wmld = LOWORD(wParam);
+        int wmEvent = HIWORD(wParam);
 
-					  if (!(hListBox = CreateWindowEx(0L, TEXT("ListBox"), TEXT("Список цветов радуги"), WS_CHILD | WS_CAPTION | WS_VISIBLE | WS_SIZEBOX | 
-						  WS_HSCROLL | WS_VSCROLL, 20, 50, 160, 250, hWnd, (HMENU)(IDC_LISTBOX), hInstance, NULL))) return (-1);
+        if (wmld == IDCANCEL) {
+            DestroyWindow(hWnd);
+            return;
+        }
 
-					  
+        if (wmld == 101) {
+            HandleAddButton();
+        }
+    }
 
-					  SendMessage(hListBox, LB_ADDSTRING, 0, (LPARAM)TEXT("красный"));
-					  SendMessage(hListBox, LB_ADDSTRING, 0, (LPARAM)TEXT("оранжевый"));
-					  SendMessage(hListBox, LB_ADDSTRING, 0, (LPARAM)TEXT("желтый"));
-					  SendMessage(hListBox, LB_ADDSTRING, 0, (LPARAM)TEXT("зеленый"));
-					  SendMessage(hListBox, LB_ADDSTRING,0, (LPARAM)TEXT("голубой"));
-					  SendMessage(hListBox, LB_ADDSTRING, 0, (LPARAM)TEXT("синий"));
-					  SendMessage(hListBox, LB_ADDSTRING, 0, (LPARAM)TEXT("фиолетовый"));
-					  
+    void HandleAddButton() {
+        TCHAR str[500] = {};
+        int itemIndex = (int)SendMessage(hListBox, LB_GETCURSEL, 0, 0L);
+        SendMessage(hListBox, LB_GETTEXT, itemIndex, reinterpret_cast<LPARAM>(str));
 
-					  SendMessage(hListBox, LB_SETCURSEL, (WPARAM)0, 0L);
+        SetWindowText(hStat, str);
+        SetFocus(hStat);
 
-					 // if (!(hButtonSave = CreateWindowEx(0L, TEXT("Button"), TEXT("В буфер"), WS_CHILD | WS_BORDER | WS_VISIBLE, 20, 240, 80, 24, hWnd, 
-						//  (HMENU)(IDC_BTN_SAVE), NULL, NULL))) return (-1);
+        HDC hdc = GetDC(hStat);
+        SetTextColor(hdc, colorEntries[itemIndex].color);
+        TextOut(hdc, 0, 0, str, lstrlen(str));
+        ReleaseDC(hStat, hdc);
+    }
 
-					  if (!(hButtonAdd = CreateWindowEx(0L, TEXT("Button"), TEXT("Отобразить"), WS_CHILD | WS_BORDER | WS_VISIBLE, 120, 350, 90, 30, hWnd,
-						  (HMENU)(IDC_BTN_ADD), hInstance, NULL))) return (-1);
+    void HandlePaint() {
+        PAINTSTRUCT ps;
+        HDC hdc = BeginPaint(hWnd, &ps);
+        TextOut(hdc, 50, 10, TEXT("Р’С‹Р±РµСЂРёС‚Рµ С†РІРµС‚:"), 14);
+        EndPaint(hWnd, &ps);
+    }
+};
 
-					  if (!(hButtonExit = CreateWindowEx(0L, TEXT("Button"), TEXT("Выход"), WS_CHILD | WS_BORDER | WS_VISIBLE, 250, 350, 90, 30, hWnd,
-						  (HMENU)(IDCANCEL), hInstance, NULL))) return (-1);
-
-	}
-		return 0;
-
-	case WM_COMMAND:
-	{
-					   
-					   wmld = LOWORD(wParam);
-					   wmEvent = HIWORD(wParam);
-					   static TCHAR str[500];
-
-					   switch (wmld)
-					   {
-
-					   case IDCANCEL:
-						   DestroyWindow(hWnd);
-						   break;
-
-					   case IDC_BTN_ADD:
-					   {
-										   if (LOWORD(wParam) == IDC_BTN_ADD)
-										   {
-										   SetWindowText(hStat, (LPCWSTR)"\0");
-										   SetFocus(hListBox);
-								           int itemIndex = (int)SendMessage(hListBox, LB_GETCURSEL, 0, 0L);   //получение номера выделенной строки
-								  		   SendMessage(hListBox, LB_GETTEXT, itemIndex, LPARAM(str));        //сохранение в буфере выделенного текста
-										  
-										   
-										   switch (itemIndex)
-											   {
-										   case 0:
-											{	
-                                               SetWindowText(hStat, str);
-											   HDC hdc = GetDC(hStat);
-										       SetTextColor(hdc, RGB(255,0,0));											   										 
-											   TextOut(hdc,NULL,NULL,str,25);
-											   ReleaseDC(hStat,hdc);
-											   
-										   } break;
-										   case 1:
-										   {
-													 SetWindowText(hStat, str);
-													 HDC hdc = GetDC(hStat);
-													 SetTextColor(hdc, RGB(255, 125, 0));
-													 TextOut(hdc, NULL, NULL, str, 25);
-													 ReleaseDC(hStat, hdc);
-
-										   } break;
-										   case 2:
-										   {
-													 SetWindowText(hStat, str);
-													 HDC hdc = GetDC(hStat);
-													 SetTextColor(hdc, RGB(255, 255, 0));
-													 TextOut(hdc, NULL, NULL, str, 25);
-													 ReleaseDC(hStat, hdc);
-
-										   } break;
-										   case 3:
-										   {
-													 SetWindowText(hStat, str);
-													 HDC hdc = GetDC(hStat);
-													 SetTextColor(hdc, RGB(0, 255, 0));
-													 TextOut(hdc, NULL, NULL, str, 25);
-													 ReleaseDC(hStat, hdc);
-
-										   } break;
-										   case 4:
-										   {
-													 SetWindowText(hStat, str);
-													 HDC hdc = GetDC(hStat);
-													 SetTextColor(hdc, RGB(0, 255, 255));
-													 TextOut(hdc, NULL, NULL, str, 25);
-													 ReleaseDC(hStat, hdc);
-
-										   } break;
-										   case 5:
-										   {
-													 SetWindowText(hStat, str);
-													 HDC hdc = GetDC(hStat);
-													 SetTextColor(hdc, RGB(0, 0, 255));
-													 TextOut(hdc, NULL, NULL, str, 25);
-													 ReleaseDC(hStat, hdc);
-
-										   } break;
-										   case 6:
-										   {
-													 SetWindowText(hStat, str);
-													 HDC hdc = GetDC(hStat);
-													 SetTextColor(hdc, RGB(125, 0, 255));
-													 TextOut(hdc, NULL, NULL, str, 25);
-													 ReleaseDC(hStat, hdc);
-
-										   } break;
-
-										   default:
-											   return(DefWindowProc(hWnd, msg, wParam, lParam));
-								               }
-										   }
-
-										   
-					   } break;
-
-					   default:
-						   return(DefWindowProc(hWnd, msg, wParam, lParam));
-					   }
-	} break;
-
-
-	case WM_PAINT:    // Вывод при обновлении окна (перерисовка)
-		PAINTSTRUCT ps;
-		hdc = BeginPaint(hWnd, &ps);  // Получение контекста для	
-		TextOut(hdc, 50, 10, TEXT("Выберите любой цвет:"), 20);
-		EndPaint(hWnd, &ps); // Завершение обновления окна
-		break;
-
-
-	case WM_DESTROY:  // Завершение работы приложения
-		PostQuitMessage(IDCANCEL); // Посылка WM_QUIT приложению
-		break;
-	default: // Вызов "Обработчика по умолчанию"
-		return(DefWindowProc(hWnd, msg, wParam, lParam));
-	}
-	return 0;// Для ветвей с "break"
-
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
+    WinApp app(hInstance);
+    return app.Run();
 }
